@@ -27,8 +27,11 @@ export async function GET(
 
     if (session.status === "complete" && session.summary) {
       response.result = {
+        topicName: session.topicName,
         notionPageUrl: session.notionPageUrl || "",
         summary: session.summary,
+        urls: session.urls,
+        transcripts: session.transcripts || [],
       };
     }
 

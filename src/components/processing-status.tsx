@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { StatusResponse } from "@/types";
 
 interface ProcessingStatusProps {
@@ -45,7 +42,6 @@ export function ProcessingStatus({
           setError(data.error || "Processing failed");
           onError(data.error || "Processing failed");
         } else if (data.status === "processing" || data.status === "pending") {
-          // Continue polling
           timeoutId = setTimeout(pollStatus, 2000);
         }
       } catch (err) {
@@ -65,49 +61,21 @@ export function ProcessingStatus({
   }, [sessionId, onComplete, onError]);
 
   const progress = status?.progress;
-  const progressPercent = progress
-    ? Math.round((progress.current / progress.total) * 100)
-    : 0;
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-muted-foreground">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {status?.status === "complete" ? (
-            <>
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
-              Processing Complete
-            </>
-          ) : error || status?.status === "failed" ? (
-            <>
-              <XCircle className="h-5 w-5 text-red-500" />
-              Processing Failed
-            </>
-          ) : (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing Content
-            </>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {error ? (
-          <div className="text-red-500">{error}</div>
-        ) : (
-          <>
-            <Progress value={progressPercent} className="h-2" />
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                {progress?.stage || "Initializing..."}
-              </span>
-              <Badge variant="secondary">
-                {progress?.current || 0} / {progress?.total || 0} URLs
-              </Badge>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="text-center py-16 space-y-6">
+      <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+      <p className="text-muted-foreground">
+        {progress?.stage || "Processing..."}
+      </p>
+    </div>
   );
 }

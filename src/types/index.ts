@@ -20,7 +20,7 @@ export interface SummaryResult {
   summary: string;
   keyTakeaways: string;
   howToApply: string;
-  studyQuestions: string;
+  studyQuestions?: string; // Deprecated - no longer generated
   connectionsAndPatterns: string;
 }
 
@@ -63,7 +63,10 @@ export interface StatusResponse {
   };
   error?: string;
   result?: {
+    topicName: string;
     notionPageUrl: string;
     summary: SummaryResult;
+    urls: string[];
+    transcripts: TranscriptResult[];
   };
 }

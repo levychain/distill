@@ -4,8 +4,8 @@
   "description": "Extract transcripts, generate study guides from YouTube, TikTok, Instagram, and X",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#7c3aed",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
   "orientation": "portrait-primary",
   "icons": [
     {

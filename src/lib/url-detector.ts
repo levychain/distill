@@ -69,9 +69,30 @@ export function extractVideoId(url: string, platform: Platform): string | null {
 }
 
 export function parseUrls(input: string): UrlInfo[] {
-  // Extract all URLs from the input - handles spaces, newlines, or any separator
+  // Pre-process: join lines that are continuations of URLs (don't start with http)
+  const lines = input.split('\n');
+  const processedLines: string[] = [];
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    // If this line starts with http, it's a new URL
+    if (trimmed.match(/^https?:\/\//i)) {
+      processedLines.push(trimmed);
+    } else if (processedLines.length > 0) {
+      // This line is a continuation - append to previous line
+      processedLines[processedLines.length - 1] += trimmed;
+    } else {
+      // First line doesn't start with http, just add it
+      processedLines.push(trimmed);
+    }
+  }
+  
+  // Join everything and extract URLs
+  const cleanedInput = processedLines.join(' ');
   const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
-  const matches = input.match(urlRegex) || [];
+  const matches = cleanedInput.match(urlRegex) || [];
   
   // Deduplicate URLs
   const uniqueUrls = [...new Set(matches)];

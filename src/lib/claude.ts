@@ -5,28 +5,18 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || "",
 });
 
-const STUDY_PROMPT = `You are helping me study and deeply understand content I've collected from the internet.
+const STUDY_PROMPT = `Distill this content into 3-5 key takeaways.
 
-I've gathered transcripts from multiple videos/posts on a related topic. Please analyze them and provide:
-
-## Summary
-A clear, comprehensive summary of the key information across all sources. What are they teaching? What's the core message?
-
-## Key Takeaways
-The most important points I should remember, formatted as a numbered list.
-
-## How to Apply This
-Practical steps I can take to apply this knowledge. Be specific and actionable.
-
-## Study Questions
-5-10 questions I can ask myself to test my understanding of this material.
-
-## Connections and Patterns
-What themes or patterns appear across multiple sources? Where do the sources agree or disagree?
+RULES:
+- Each point on its own line
+- Start each with "• " (bullet)
+- One sentence per bullet, max 15 words
+- No intro text, just bullets
+- No markdown
 
 ---
 
-Here are the transcripts:
+Content:
 
 `;
 
@@ -82,34 +72,12 @@ export async function generateStudySummary(
 }
 
 function parseClaudeResponse(text: string): SummaryResult {
-  // Split by ## headers
-  const sections: Record<string, string> = {};
-  const headerRegex = /^## (.+)$/gm;
-  let lastHeader = "";
-  let lastIndex = 0;
-
-  let match;
-  while ((match = headerRegex.exec(text)) !== null) {
-    if (lastHeader && lastIndex > 0) {
-      sections[lastHeader.toLowerCase()] = text
-        .slice(lastIndex, match.index)
-        .trim();
-    }
-    lastHeader = match[1];
-    lastIndex = match.index + match[0].length;
-  }
-
-  // Get the last section
-  if (lastHeader) {
-    sections[lastHeader.toLowerCase()] = text.slice(lastIndex).trim();
-  }
-
+  // Just return the raw bullet list
   return {
-    summary: sections["summary"] || "",
-    keyTakeaways: sections["key takeaways"] || "",
-    howToApply: sections["how to apply this"] || "",
-    studyQuestions: sections["study questions"] || "",
-    connectionsAndPatterns: sections["connections and patterns"] || "",
+    summary: text.trim(),
+    keyTakeaways: "",
+    howToApply: "",
+    connectionsAndPatterns: "",
   };
 }
 

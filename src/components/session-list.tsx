@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ExternalLink, Clock, FileText } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 interface Session {
   id: string;
@@ -38,98 +35,49 @@ export function SessionList() {
     fetchSessions();
   }, []);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "complete":
-        return <Badge variant="success">Complete</Badge>;
-      case "processing":
-        return <Badge variant="warning">Processing</Badge>;
-      case "failed":
-        return <Badge variant="destructive">Failed</Badge>;
-      default:
-        return <Badge variant="secondary">Pending</Badge>;
-    }
-  };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          Loading sessions...
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (sessions.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>No study sessions yet.</p>
-          <p className="text-sm">Paste some URLs above to get started!</p>
-        </CardContent>
-      </Card>
-    );
+  if (isLoading || sessions.length === 0) {
+    return null;
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Recent Study Sessions</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {sessions.map((session) => (
-          <div
+    <div className="space-y-3">
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        Recent
+      </span>
+      <div className="space-y-1">
+        {sessions.slice(0, 5).map((session) => (
+          <Link
             key={session.id}
-            className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+            href={`/results/${session.id}`}
+            className="flex items-center justify-between p-3 -mx-3 rounded-xl hover:bg-secondary/50 transition-colors group"
           >
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <Link
-                  href={`/results/${session.id}`}
-                  className="font-medium truncate hover:underline"
-                >
-                  {session.topicName}
-                </Link>
-                {getStatusBadge(session.status)}
-              </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <FileText className="h-3 w-3" />
-                  {session.urlCount} URL{session.urlCount !== 1 ? "s" : ""}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {formatDate(session.createdAt)}
-                </span>
-              </div>
+              <p className="font-medium truncate text-sm">
+                {session.topicName}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {session.urlCount} source{session.urlCount !== 1 ? "s" : ""} • {formatDate(session.createdAt)}
+              </p>
             </div>
-            {session.notionPageUrl && session.status === "complete" && (
-              <Button
-                variant="ghost"
-                size="sm"
-                asChild
-                className="ml-2 shrink-0"
-              >
-                <a href={session.notionPageUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </Button>
-            )}
-          </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+          </Link>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

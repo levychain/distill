@@ -142,55 +142,16 @@ function buildPageContent(
   // Divider
   blocks.push({ type: "divider", divider: {} });
 
-  // Summary section
+  // TLDR section
   blocks.push({
     type: "heading_2",
     heading_2: {
-      rich_text: [{ type: "text", text: { content: "Summary" } }],
+      rich_text: [{ type: "text", text: { content: "TLDR" } }],
     },
   });
 
   addTextBlock(blocks, summary.summary);
 
-  // Key Takeaways
-  blocks.push({
-    type: "heading_2",
-    heading_2: {
-      rich_text: [{ type: "text", text: { content: "Key Takeaways" } }],
-    },
-  });
-
-  addTextBlock(blocks, summary.keyTakeaways);
-
-  // How to Apply This
-  blocks.push({
-    type: "heading_2",
-    heading_2: {
-      rich_text: [{ type: "text", text: { content: "How to Apply This" } }],
-    },
-  });
-
-  addTextBlock(blocks, summary.howToApply);
-
-  // Study Questions
-  blocks.push({
-    type: "heading_2",
-    heading_2: {
-      rich_text: [{ type: "text", text: { content: "Study Questions" } }],
-    },
-  });
-
-  addTextBlock(blocks, summary.studyQuestions);
-
-  // Connections and Patterns
-  blocks.push({
-    type: "heading_2",
-    heading_2: {
-      rich_text: [{ type: "text", text: { content: "Connections and Patterns" } }],
-    },
-  });
-
-  addTextBlock(blocks, summary.connectionsAndPatterns);
 
   // Divider
   blocks.push({ type: "divider", divider: {} });
@@ -246,33 +207,41 @@ function buildPageContent(
 function addTextBlock(blocks: any[], text: string): void {
   // Notion has a 2000 character limit per rich_text block
   const MAX_LENGTH = 1900;
-  const lines = text.split("\n");
+  
+  if (!text || text.trim().length === 0) return;
 
-  let currentBlock = "";
-
-  for (const line of lines) {
-    if ((currentBlock + "\n" + line).length > MAX_LENGTH) {
-      if (currentBlock) {
-        blocks.push({
-          type: "paragraph",
-          paragraph: {
-            rich_text: [{ type: "text", text: { content: currentBlock } }],
-          },
-        });
-      }
-      currentBlock = line;
+  // Split text into chunks that fit within Notion's limit
+  let remaining = text;
+  
+  while (remaining.length > 0) {
+    let chunk: string;
+    
+    if (remaining.length <= MAX_LENGTH) {
+      chunk = remaining;
+      remaining = "";
     } else {
-      currentBlock = currentBlock ? currentBlock + "\n" + line : line;
+      // Try to split at a newline or space
+      let splitIndex = remaining.lastIndexOf("\n", MAX_LENGTH);
+      if (splitIndex === -1 || splitIndex < MAX_LENGTH / 2) {
+        splitIndex = remaining.lastIndexOf(" ", MAX_LENGTH);
+      }
+      if (splitIndex === -1 || splitIndex < MAX_LENGTH / 2) {
+        // Force split at MAX_LENGTH if no good break point
+        splitIndex = MAX_LENGTH;
+      }
+      
+      chunk = remaining.slice(0, splitIndex);
+      remaining = remaining.slice(splitIndex).trimStart();
     }
-  }
-
-  if (currentBlock) {
-    blocks.push({
-      type: "paragraph",
-      paragraph: {
-        rich_text: [{ type: "text", text: { content: currentBlock } }],
-      },
-    });
+    
+    if (chunk.trim()) {
+      blocks.push({
+        type: "paragraph",
+        paragraph: {
+          rich_text: [{ type: "text", text: { content: chunk.trim() } }],
+        },
+      });
+    }
   }
 }
 

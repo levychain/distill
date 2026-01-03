@@ -1,114 +1,164 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Download, BookOpen, Lightbulb, Target, HelpCircle, Link2 } from "lucide-react";
-import type { SummaryResult } from "@/types";
+import { ExternalLink, Copy, Check, ChevronDown, ChevronUp, BookOpen, TextSelect } from "lucide-react";
+import type { SummaryResult, TranscriptResult } from "@/types";
+import { Chat } from "@/components/chat";
 
 interface ResultsViewProps {
   sessionId: string;
   notionPageUrl: string;
   summary: SummaryResult;
+  urls?: string[];
+  transcripts?: TranscriptResult[];
 }
 
-export function ResultsView({ sessionId, notionPageUrl, summary }: ResultsViewProps) {
-  const handleDownload = () => {
-    window.open(`/api/export/${sessionId}`, "_blank");
+function getPlatformFromUrl(url: string): string {
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
+  if (url.includes("twitter.com") || url.includes("x.com")) return "X";
+  if (url.includes("tiktok.com")) return "TikTok";
+  if (url.includes("instagram.com")) return "Instagram";
+  return "Link";
+}
+
+export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], transcripts = [] }: ResultsViewProps) {
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const transcriptRef = useRef<HTMLDivElement>(null);
+
+  const successfulTranscripts = transcripts.filter(t => t.success);
+
+  const handleSelectAll = () => {
+    const el = transcriptRef.current as unknown as HTMLTextAreaElement;
+    if (el) {
+      el.focus();
+      el.select();
+    }
   };
 
-  const handleOpenNotion = () => {
-    window.open(notionPageUrl, "_blank");
+  const handleCopy = async (text: string, id: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
+
+  const allTranscripts = successfulTranscripts.map(t => t.transcript).join('\n\n---\n\n');
 
   return (
-    <div className="space-y-6 w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto space-y-8">
+      
+      {/* Sources */}
+      {urls.length > 0 && (
+        <div className="flex items-center gap-3 flex-wrap">
+          {urls.map((url, i) => (
+            <button
+              key={i}
+              onClick={() => handleCopy(url, `url-${i}`)}
+              className="px-3 py-1.5 text-sm bg-secondary/50 hover:bg-secondary rounded-full transition-colors flex items-center gap-2"
+            >
+              {getPlatformFromUrl(url)}
+              {copied === `url-${i}` && <Check className="h-3 w-3 text-green-500" />}
+            </button>
+          ))}
+          {urls.length > 1 && (
+            <button
+              onClick={() => handleCopy(urls.join('\n'), 'urls')}
+              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              {copied === 'urls' ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+              <span>Copy all</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* TLDR */}
+      <div className="space-y-4">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Summary</span>
+        <ul className="space-y-3">
+          {summary.summary.split('\n').filter(line => line.trim()).map((line, i) => (
+            <li key={i} className="flex gap-4 text-[15px] leading-relaxed">
+              <span className="text-muted-foreground/50 select-none">•</span>
+              <span>{line.replace(/^[•\-\*]\s*/, '').replace(/^\d+\.\s*/, '')}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Transcript */}
+      {successfulTranscripts.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setTranscriptOpen(!transcriptOpen)}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {transcriptOpen ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+              Transcript
+            </button>
+            
+            {transcriptOpen && (
+              <>
+                <button 
+                  onClick={handleSelectAll}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                >
+                  <TextSelect className="h-3.5 w-3.5" />
+                  Select
+                </button>
+                <button 
+                  onClick={() => handleCopy(allTranscripts, 'transcript')}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+                >
+                  {copied === 'transcript' ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                  Copy
+                </button>
+              </>
+            )}
+          </div>
+          
+          {transcriptOpen && (
+            <textarea
+              ref={transcriptRef as unknown as React.RefObject<HTMLTextAreaElement>}
+              defaultValue={allTranscripts}
+              readOnly
+              spellCheck={false}
+              className="w-full h-48 p-4 text-sm text-muted-foreground bg-secondary/30 rounded-xl resize-none leading-relaxed border-none"
+            />
+          )}
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex flex-wrap gap-3">
-        <Button onClick={handleOpenNotion} className="flex-1 sm:flex-none">
+      <div className="flex gap-3 pt-4 border-t border-border/50">
+        <Button 
+          onClick={() => window.open(notionPageUrl, '_blank')} 
+          className="flex-1 h-11 rounded-xl"
+        >
           <ExternalLink className="mr-2 h-4 w-4" />
           Open in Notion
         </Button>
-        <Button onClick={handleDownload} variant="outline" className="flex-1 sm:flex-none">
-          <Download className="mr-2 h-4 w-4" />
-          Download for NotebookLM
+        <Button 
+          onClick={() => { handleCopy(allTranscripts, 'nlm'); window.open('https://notebooklm.google.com/', '_blank'); }}
+          variant="secondary"
+          className="flex-1 h-11 rounded-xl"
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          NotebookLM
         </Button>
       </div>
 
-      {/* Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p className="whitespace-pre-wrap">{summary.summary}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Key Takeaways */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-yellow-500" />
-            Key Takeaways
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap">{summary.keyTakeaways}</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* How to Apply */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-green-500" />
-            How to Apply This
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap">{summary.howToApply}</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Study Questions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <HelpCircle className="h-5 w-5 text-blue-500" />
-            Study Questions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap">{summary.studyQuestions}</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Connections and Patterns */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link2 className="h-5 w-5 text-purple-500" />
-            Connections and Patterns
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <div className="whitespace-pre-wrap">{summary.connectionsAndPatterns}</div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Chat */}
+      <div className="pt-4">
+        <Chat 
+          context={`Summary:\n${summary.summary}\n\nTranscripts:\n${allTranscripts}`}
+        />
+      </div>
     </div>
   );
 }
