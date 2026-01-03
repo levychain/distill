@@ -13,6 +13,7 @@ RUN npm ci
 COPY . .
 
 # Build the Next.js app
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage
@@ -27,15 +28,21 @@ RUN apk add --no-cache ffmpeg python3 py3-pip
 RUN pip3 install --break-system-packages yt-dlp
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built assets from builder
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Create public folder (even if empty)
+RUN mkdir -p public
+
+# Set correct permissions
+RUN chown -R nextjs:nodejs /app
 
 USER nextjs
 
@@ -44,5 +51,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/auth/session', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
+CMD ["node", "server.js"]

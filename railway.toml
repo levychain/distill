@@ -3,8 +3,8 @@ builder = "dockerfile"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-healthcheckPath = "/"
-healthcheckTimeout = 100
+healthcheckPath = "/api/auth/session"
+healthcheckTimeout = 300
+startCommand = "node server.js"
 restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3
-
+restartPolicyMaxRetries = 5
