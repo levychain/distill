@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { parseUrls } from "@/lib/url-detector";
 import { createStudyPage, updateStudyPage, updatePageStatus } from "@/lib/notion";
 import { downloadAudio, fetchTweetText } from "@/lib/video-downloader";
@@ -17,12 +15,6 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const body: ProcessRequest = await request.json();
     const { urls, topicName } = body;
 
