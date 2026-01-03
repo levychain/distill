@@ -69,35 +69,19 @@ export function extractVideoId(url: string, platform: Platform): string | null {
 }
 
 export function parseUrls(input: string): UrlInfo[] {
-  // First, try to extract URLs using regex (handles URLs split across lines)
-  const urlRegex = /https?:\/\/[^\s]+/gi;
+  // Extract all URLs from the input - handles spaces, newlines, or any separator
+  const urlRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi;
+  const matches = input.match(urlRegex) || [];
   
-  // Remove line breaks within URLs by joining lines that don't start with http
-  const cleanedInput = input
-    .split("\n")
-    .reduce((acc: string[], line: string) => {
-      const trimmed = line.trim();
-      if (!trimmed) return acc;
-      
-      // If line starts with http, it's a new URL
-      if (trimmed.match(/^https?:\/\//i)) {
-        acc.push(trimmed);
-      } else if (acc.length > 0) {
-        // Otherwise, append to the previous line (URL was split)
-        acc[acc.length - 1] += trimmed;
-      }
-      return acc;
-    }, []);
+  // Deduplicate URLs
+  const uniqueUrls = [...new Set(matches)];
 
-  // Extract URLs from the cleaned input
-  const urls = cleanedInput.length > 0 
-    ? cleanedInput 
-    : (input.match(urlRegex) || []);
-
-  return urls.map((url) => {
-    const platform = detectPlatform(url);
-    const id = extractVideoId(url, platform);
-    return { url, platform, id: id ?? undefined };
+  return uniqueUrls.map((url) => {
+    // Clean up any trailing punctuation
+    const cleanUrl = url.replace(/[.,;:!?)]+$/, '');
+    const platform = detectPlatform(cleanUrl);
+    const id = extractVideoId(cleanUrl, platform);
+    return { url: cleanUrl, platform, id: id ?? undefined };
   });
 }
 
