@@ -19,6 +19,7 @@ if (process.env.NODE_ENV !== "production") {
 
 export function createSession(
   id: string,
+  userId: string,
   topicName: string,
   urls: string[],
   notionPageId: string,
@@ -26,6 +27,7 @@ export function createSession(
 ): StudySession {
   const session: StudySession = {
     id,
+    userId,
     topicName,
     urls,
     status: "pending",
@@ -69,6 +71,12 @@ export function getAllSessions(): StudySession[] {
   return Array.from(sessions.values()).sort(
     (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
   );
+}
+
+export function getSessionsByUser(userId: string): StudySession[] {
+  return Array.from(sessions.values())
+    .filter(s => s.userId === userId)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
 export function deleteSession(id: string): boolean {

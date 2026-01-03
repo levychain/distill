@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { parseUrls } from "@/lib/url-detector";
+import { getUserId } from "@/lib/user-id";
 import { Loader2, ArrowRight } from "lucide-react";
 
 export function UrlInputForm() {
   const [urls, setUrls] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string>("");
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setUserId(getUserId());
+  }, []);
 
   const parsedUrls = urls ? parseUrls(urls) : [];
   const validUrls = parsedUrls.filter((u) => u.platform !== "unknown");
@@ -44,6 +50,7 @@ export function UrlInputForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           urls: validUrls.map((u) => u.url),
+          userId,
         }),
       });
 

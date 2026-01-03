@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Copy, Check, ChevronDown, ChevronUp, BookOpen, TextSelect } from "lucide-react";
+import { Copy, Check, ChevronDown, ChevronUp, BookOpen, TextSelect } from "lucide-react";
 import type { SummaryResult, TranscriptResult } from "@/types";
 import { Chat } from "@/components/chat";
 
@@ -151,15 +151,7 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
       {/* Actions */}
       <div className="flex gap-3 pt-4 border-t border-border/50">
         <Button 
-          onClick={() => window.open(notionPageUrl, '_blank')} 
-          className="flex-1 h-11 rounded-xl"
-        >
-          <ExternalLink className="mr-2 h-4 w-4" />
-          Open in Notion
-        </Button>
-        <Button 
           onClick={() => { handleCopy(allTranscripts, 'nlm'); window.open('https://notebooklm.google.com/', '_blank'); }}
-          variant="secondary"
           className="flex-1 h-11 rounded-xl"
         >
           <BookOpen className="mr-2 h-4 w-4" />

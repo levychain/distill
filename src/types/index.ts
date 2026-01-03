@@ -26,6 +26,7 @@ export interface SummaryResult {
 
 export interface StudySession {
   id: string;
+  userId: string;
   topicName: string;
   urls: string[];
   status: ProcessingStatus;
@@ -46,6 +47,7 @@ export interface StudySession {
 export interface ProcessRequest {
   urls: string[];
   topicName?: string;
+  userId: string;
 }
 
 export interface ProcessResponse {

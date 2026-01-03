@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { getUserId } from "@/lib/user-id";
 
 interface Session {
   id: string;
@@ -20,7 +21,8 @@ export function SessionList() {
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const response = await fetch("/api/sessions");
+        const userId = getUserId();
+        const response = await fetch(`/api/sessions?userId=${encodeURIComponent(userId)}`);
         if (response.ok) {
           const data = await response.json();
           setSessions(data.sessions);

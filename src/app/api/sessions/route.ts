@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllSessions } from "@/lib/session-store";
+import { getSessionsByUser } from "@/lib/session-store";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const sessions = getAllSessions();
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json({ sessions: [] });
+    }
+
+    const sessions = getSessionsByUser(userId);
 
     // Return simplified session list
     const sessionList = sessions.map((s) => ({
