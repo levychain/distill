@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { getSession } from "@/lib/session-store";
 import type { StatusResponse } from "@/types";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }

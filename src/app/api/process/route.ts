@@ -13,6 +13,8 @@ import {
 } from "@/lib/session-store";
 import type { ProcessRequest, TranscriptResult } from "@/types";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
