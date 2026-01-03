@@ -1,13 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import type { StatusResponse } from "@/types";
 
 interface ProcessingStatusProps {
   sessionId: string;
   onComplete: (result: StatusResponse["result"]) => void;
   onError: (error: string) => void;
+}
+
+const loadingMessages = [
+  "Downloading content...",
+  "Extracting audio...",
+  "Transcribing...",
+  "Almost done...",
+];
+
+function formatStage(stage: string | undefined): string {
+  if (!stage) return "Processing...";
+  // Remove mentions of "Claude" or technical details
+  if (stage.toLowerCase().includes('claude')) return "Generating summary...";
+  if (stage.toLowerCase().includes('summary')) return "Almost done...";
+  return stage;
 }
 
 export function ProcessingStatus({
@@ -17,6 +32,15 @@ export function ProcessingStatus({
 }: ProcessingStatusProps) {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dots, setDots] = useState(0);
+
+  // Animated dots
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(d => (d + 1) % 4);
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -70,12 +94,47 @@ export function ProcessingStatus({
     );
   }
 
+  const stageText = formatStage(progress?.stage);
+
   return (
-    <div className="text-center py-16 space-y-6">
-      <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-      <p className="text-muted-foreground">
-        {progress?.stage || "Processing..."}
-      </p>
+    <div className="text-center py-20 space-y-8">
+      {/* Animated pulsing rings */}
+      <div className="relative w-16 h-16 mx-auto">
+        <motion.div
+          className="absolute inset-0 rounded-full border-2 border-primary/30"
+          animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+        />
+        <motion.div
+          className="absolute inset-0 rounded-full border-2 border-primary/30"
+          animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+        />
+        <motion.div
+          className="absolute inset-0 rounded-full border-2 border-primary"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          style={{ borderTopColor: 'transparent', borderRightColor: 'transparent' }}
+        />
+        <div className="absolute inset-2 rounded-full bg-primary/10" />
+      </div>
+
+      {/* Stage text with animated dots */}
+      <motion.div
+        key={stageText}
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-2"
+      >
+        <p className="text-lg font-medium">
+          {stageText.replace('...', '')}<span className="text-primary">{'.'.repeat(dots + 1)}</span>
+        </p>
+        {progress && progress.total > 1 && (
+          <p className="text-sm text-muted-foreground">
+            {progress.current} of {progress.total} sources
+          </p>
+        )}
+      </motion.div>
     </div>
   );
 }

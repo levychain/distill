@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, ChevronDown, ChevronUp, BookOpen, TextSelect } from "lucide-react";
+import { Copy, Check, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import type { SummaryResult, TranscriptResult } from "@/types";
 import { Chat } from "@/components/chat";
 import { motion } from "framer-motion";
@@ -26,17 +26,8 @@ function getPlatformFromUrl(url: string): string {
 export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], transcripts = [] }: ResultsViewProps) {
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
-  const transcriptRef = useRef<HTMLDivElement>(null);
 
   const successfulTranscripts = transcripts.filter(t => t.success);
-
-  const handleSelectAll = () => {
-    const el = transcriptRef.current as unknown as HTMLTextAreaElement;
-    if (el) {
-      el.focus();
-      el.select();
-    }
-  };
 
   const handleCopy = async (text: string, id: string) => {
     await navigator.clipboard.writeText(text);
@@ -61,10 +52,14 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
             <button
               key={i}
               onClick={() => handleCopy(url, `url-${i}`)}
-              className="px-3 py-1.5 text-sm bg-secondary/50 hover:bg-secondary rounded-full transition-colors flex items-center gap-2"
+              className="px-3 py-1.5 text-sm bg-secondary/50 hover:bg-secondary rounded-full transition-colors flex items-center gap-2 group"
             >
               {getPlatformFromUrl(url)}
-              {copied === `url-${i}` && <Check className="h-3 w-3 text-green-500" />}
+              {copied === `url-${i}` ? (
+                <Check className="h-3 w-3 text-green-500" />
+              ) : (
+                <Copy className="h-3 w-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+              )}
             </button>
           ))}
           {urls.length > 1 && (
@@ -118,24 +113,13 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
               Transcript
             </button>
             
-            {transcriptOpen && (
-              <>
-                <button 
-                  onClick={handleSelectAll}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-                >
-                  <TextSelect className="h-3.5 w-3.5" />
-                  Select
-                </button>
-                <button 
-                  onClick={() => handleCopy(allTranscripts, 'transcript')}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-                >
-                  {copied === 'transcript' ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-                  Copy
-                </button>
-              </>
-            )}
+            <button 
+              onClick={() => handleCopy(allTranscripts, 'transcript')}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-2 py-1.5 -my-1.5 rounded-md hover:bg-secondary/50"
+            >
+              {copied === 'transcript' ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+              Copy
+            </button>
           </div>
           
           {transcriptOpen && (
@@ -145,7 +129,6 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
               transition={{ duration: 0.2 }}
             >
               <textarea
-                ref={transcriptRef as unknown as React.RefObject<HTMLTextAreaElement>}
                 value={allTranscripts}
                 onChange={() => {}}
                 onKeyDown={(e) => {

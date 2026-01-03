@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
 export const dynamic = "force-dynamic";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || "",
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
 });
 
 interface ChatMessage {
@@ -35,22 +35,24 @@ ${context}
 
 Answer questions based on this content. If asked something not covered, say so briefly.`;
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1",
       max_tokens: 1024,
-      system: systemPrompt,
-      messages: messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...messages.map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+      ],
     });
 
-    const content = response.content[0];
-    if (content.type !== "text") {
-      throw new Error("Unexpected response type");
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error("No response content");
     }
 
-    return NextResponse.json({ response: content.text });
+    return NextResponse.json({ response: content });
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(
