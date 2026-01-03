@@ -95,7 +95,7 @@ export function parseUrls(input: string): UrlInfo[] {
   const matches = cleanedInput.match(urlRegex) || [];
   
   // Deduplicate URLs
-  const uniqueUrls = [...new Set(matches)];
+  const uniqueUrls = Array.from(new Set(matches));
 
   return uniqueUrls.map((url) => {
     // Clean up any trailing punctuation
