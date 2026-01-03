@@ -203,7 +203,7 @@ export function UrlInputForm() {
       <button
         type="submit"
         disabled={isLoading || urlList.length === 0}
-        className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity"
+        className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-40 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
       >
         {isLoading ? (
           <>
