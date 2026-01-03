@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check, ChevronDown, ChevronUp, BookOpen, TextSelect } from "lucide-react";
 import type { SummaryResult, TranscriptResult } from "@/types";
 import { Chat } from "@/components/chat";
+import { motion } from "framer-motion";
 
 interface ResultsViewProps {
   sessionId: string;
@@ -50,7 +51,12 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
       
       {/* Sources */}
       {urls.length > 0 && (
-        <div className="flex items-center gap-3 flex-wrap">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0 }}
+          className="flex items-center gap-3 flex-wrap"
+        >
           {urls.map((url, i) => (
             <button
               key={i}
@@ -70,11 +76,16 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
               <span>Copy all</span>
             </button>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* TLDR */}
-      <div className="space-y-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.1 }}
+        className="space-y-4"
+      >
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Summary</span>
         <ul className="space-y-3">
           {summary.summary.split('\n').filter(line => line.trim()).map((line, i) => (
@@ -84,11 +95,16 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
             </li>
           ))}
         </ul>
-      </div>
+      </motion.div>
 
       {/* Transcript */}
       {successfulTranscripts.length > 0 && (
-        <div className="space-y-3">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.2 }}
+          className="space-y-3"
+        >
           <div className="flex items-center gap-4">
             <button
               onClick={() => setTranscriptOpen(!transcriptOpen)}
@@ -123,33 +139,44 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
           </div>
           
           {transcriptOpen && (
-            <textarea
-              ref={transcriptRef as unknown as React.RefObject<HTMLTextAreaElement>}
-              value={allTranscripts}
-              onChange={() => {}}
-              onKeyDown={(e) => {
-                // Manually handle Cmd+A
-                if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.2 }}
+            >
+              <textarea
+                ref={transcriptRef as unknown as React.RefObject<HTMLTextAreaElement>}
+                value={allTranscripts}
+                onChange={() => {}}
+                onKeyDown={(e) => {
+                  // Manually handle Cmd+A
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                    e.preventDefault();
+                    e.currentTarget.select();
+                    return;
+                  }
+                  // Allow Cmd+C
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+                    return;
+                  }
+                  // Block all other input
                   e.preventDefault();
-                  e.currentTarget.select();
-                  return;
-                }
-                // Allow Cmd+C
-                if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
-                  return;
-                }
-                // Block all other input
-                e.preventDefault();
-              }}
-              spellCheck={false}
-              className="w-full h-48 p-4 text-sm text-muted-foreground bg-secondary/30 rounded-xl resize-none leading-relaxed border-none cursor-text focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
+                }}
+                spellCheck={false}
+                className="w-full h-48 p-4 text-sm text-muted-foreground bg-secondary/30 rounded-xl resize-none leading-relaxed border-none cursor-text focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Actions */}
-      <div className="flex gap-3 pt-4 border-t border-border/50">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.3 }}
+        className="flex gap-3 pt-4 border-t border-border/50"
+      >
         <Button 
           onClick={() => { handleCopy(allTranscripts, 'nlm'); window.open('https://notebooklm.google.com/', '_blank'); }}
           className="flex-1 h-11 rounded-xl"
@@ -157,14 +184,19 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
           <BookOpen className="mr-2 h-4 w-4" />
           NotebookLM
         </Button>
-      </div>
+      </motion.div>
 
       {/* Chat */}
-      <div className="pt-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, delay: 0.4 }}
+        className="pt-4"
+      >
         <Chat 
           context={`Summary:\n${summary.summary}\n\nTranscripts:\n${allTranscripts}`}
         />
-      </div>
+      </motion.div>
     </div>
   );
 }

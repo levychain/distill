@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
   role: "user" | "assistant";
@@ -131,34 +132,51 @@ export function Chat({ context }: ChatProps) {
 
       {/* Messages */}
       <div className="h-[280px] overflow-y-auto p-5 space-y-4">
-        {messages.length === 0 && (
-          <p className="text-sm text-muted-foreground/60 text-center py-12">
-            Ask anything about this content...
-          </p>
-        )}
-        {messages.map((msg, i) => (
-          <div 
-            key={i} 
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            {msg.role === 'user' ? (
-              <div className="max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-md">
-                {msg.content}
+        <AnimatePresence mode="popLayout">
+          {messages.length === 0 && (
+            <motion.p 
+              key="placeholder"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-sm text-muted-foreground/60 text-center py-12"
+            >
+              Ask anything about this content...
+            </motion.p>
+          )}
+          {messages.map((msg, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {msg.role === 'user' ? (
+                <div className="max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed bg-primary text-primary-foreground rounded-br-md">
+                  {msg.content}
+                </div>
+              ) : (
+                <div className="max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed bg-secondary/60 rounded-bl-md">
+                  <FormattedText text={msg.content} />
+                </div>
+              )}
+            </motion.div>
+          ))}
+          {isLoading && (
+            <motion.div 
+              key="loading"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-start"
+            >
+              <div className="bg-secondary/60 px-4 py-2.5 rounded-2xl rounded-bl-md">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
-            ) : (
-              <div className="max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed bg-secondary/60 rounded-bl-md">
-                <FormattedText text={msg.content} />
-              </div>
-            )}
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-secondary/60 px-4 py-2.5 rounded-2xl rounded-bl-md">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
 

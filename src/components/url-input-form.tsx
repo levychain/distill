@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { parseUrls, type UrlInfo } from "@/lib/url-detector";
 import { getUserId } from "@/lib/user-id";
 import { Loader2, ArrowRight, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Platform icons as simple SVG components
 function YouTubeIcon({ className }: { className?: string }) {
@@ -157,29 +158,46 @@ export function UrlInputForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="bg-secondary/30 border border-border/50 rounded-2xl overflow-hidden">
         {/* URL Badges */}
-        {urlList.length > 0 && (
-          <div className="p-3 flex flex-wrap gap-2 border-b border-border/30">
-            {urlList.map((urlInfo, index) => (
-              <div
-                key={urlInfo.url + index}
-                className="flex items-center gap-2 bg-secondary/60 hover:bg-secondary/80 rounded-lg px-3 py-2 text-sm transition-colors group"
-              >
-                {getPlatformIcon(urlInfo.platform)}
-                <span className="text-muted-foreground">
-                  {truncateUrl(urlInfo.url)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeUrl(urlInfo.url)}
-                  className="ml-1 text-muted-foreground/50 hover:text-foreground transition-colors"
-                  disabled={isLoading}
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+        <AnimatePresence>
+          {urlList.length > 0 && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="p-3 flex flex-wrap gap-2 border-b border-border/30">
+                <AnimatePresence mode="popLayout">
+                  {urlList.map((urlInfo) => (
+                    <motion.div
+                      key={urlInfo.url}
+                      layout
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.15 }}
+                      className="flex items-center gap-2 bg-secondary/60 hover:bg-secondary/80 rounded-lg px-3 py-2 text-sm transition-colors group"
+                    >
+                      {getPlatformIcon(urlInfo.platform)}
+                      <span className="text-muted-foreground">
+                        {truncateUrl(urlInfo.url)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeUrl(urlInfo.url)}
+                        className="ml-1 text-muted-foreground/50 hover:text-foreground transition-colors"
+                        disabled={isLoading}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
-            ))}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Input Area */}
         <textarea
@@ -203,7 +221,7 @@ export function UrlInputForm() {
       <button
         type="submit"
         disabled={isLoading || urlList.length === 0}
-        className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-40 transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98]"
+        className="w-full h-12 bg-primary text-primary-foreground rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-40 transition-colors hover:bg-primary/80"
       >
         {isLoading ? (
           <>

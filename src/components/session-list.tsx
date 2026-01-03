@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { getUserId } from "@/lib/user-id";
+import { motion } from "framer-motion";
 
 interface Session {
   id: string;
@@ -57,29 +58,40 @@ export function SessionList() {
   }
 
   return (
-    <div className="space-y-3">
+    <motion.div 
+      className="space-y-3"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+    >
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
         Recent
       </span>
       <div className="space-y-1">
-        {sessions.slice(0, 5).map((session) => (
-          <Link
+        {sessions.slice(0, 5).map((session, index) => (
+          <motion.div
             key={session.id}
-            href={`/results/${session.id}`}
-            className="flex items-center justify-between p-3 -mx-3 rounded-xl hover:bg-secondary/50 transition-colors group"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: index * 0.05 }}
           >
-            <div className="flex-1 min-w-0">
-              <p className="font-medium truncate text-sm">
-                {session.topicName}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {session.urlCount} source{session.urlCount !== 1 ? "s" : ""} • {formatDate(session.createdAt)}
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
-          </Link>
+            <Link
+              href={`/results/${session.id}`}
+              className="flex items-center justify-between p-3 -mx-3 rounded-xl hover:bg-secondary/50 transition-colors group"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate text-sm">
+                  {session.topicName}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {session.urlCount} source{session.urlCount !== 1 ? "s" : ""} • {formatDate(session.createdAt)}
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+            </Link>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
