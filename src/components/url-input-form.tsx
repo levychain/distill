@@ -71,6 +71,13 @@ export function UrlInputForm() {
           placeholder="Paste video URLs here..."
           value={urls}
           onChange={(e) => setUrls(e.target.value)}
+          onKeyDown={(e) => {
+            // Manually handle Cmd+A since something is blocking default
+            if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+              e.preventDefault();
+              e.currentTarget.select();
+            }
+          }}
           className="w-full min-h-[140px] bg-secondary/30 border border-border/50 rounded-2xl px-5 py-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50"
           disabled={isLoading}
         />

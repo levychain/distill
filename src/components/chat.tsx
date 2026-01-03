@@ -120,13 +120,6 @@ export function Chat({ context }: ChatProps) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
   return (
     <div className="rounded-2xl border border-border/50 bg-secondary/20 overflow-hidden">
       {/* Header */}
@@ -176,7 +169,19 @@ export function Chat({ context }: ChatProps) {
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              // Manually handle Cmd+A
+              if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                e.preventDefault();
+                e.currentTarget.select();
+                return;
+              }
+              // Handle Enter to submit
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
             placeholder="Type a message..."
             rows={1}
             className="flex-1 bg-secondary/50 text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50"

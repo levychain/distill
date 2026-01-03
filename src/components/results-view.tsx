@@ -125,10 +125,24 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
           {transcriptOpen && (
             <textarea
               ref={transcriptRef as unknown as React.RefObject<HTMLTextAreaElement>}
-              defaultValue={allTranscripts}
-              readOnly
+              value={allTranscripts}
+              onChange={() => {}}
+              onKeyDown={(e) => {
+                // Manually handle Cmd+A
+                if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                  e.preventDefault();
+                  e.currentTarget.select();
+                  return;
+                }
+                // Allow Cmd+C
+                if ((e.metaKey || e.ctrlKey) && e.key === 'c') {
+                  return;
+                }
+                // Block all other input
+                e.preventDefault();
+              }}
               spellCheck={false}
-              className="w-full h-48 p-4 text-sm text-muted-foreground bg-secondary/30 rounded-xl resize-none leading-relaxed border-none"
+              className="w-full h-48 p-4 text-sm text-muted-foreground bg-secondary/30 rounded-xl resize-none leading-relaxed border-none cursor-text focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           )}
         </div>
