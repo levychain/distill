@@ -36,7 +36,7 @@ ${context}
 Answer questions based on this content. If asked something not covered, say so briefly.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1",
+      model: "gpt-5.2",
       max_tokens: 1024,
       messages: [
         { role: "system", content: systemPrompt },
