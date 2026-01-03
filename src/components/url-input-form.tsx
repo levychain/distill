@@ -206,9 +206,15 @@ export function UrlInputForm() {
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={(e) => {
+            // Cmd+A to select all
             if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
               e.preventDefault();
               e.currentTarget.select();
+            }
+            // Backspace/Delete when input is empty removes last URL
+            if ((e.key === 'Backspace' || e.key === 'Delete') && inputValue === '' && urlList.length > 0) {
+              e.preventDefault();
+              setUrlList(prev => prev.slice(0, -1));
             }
           }}
           className={`w-full bg-transparent px-5 py-4 text-sm resize-none focus:outline-none placeholder:text-muted-foreground/50 ${
