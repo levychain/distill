@@ -81,7 +81,7 @@ export function UrlInputForm() {
           <span>{validUrls.length} video{validUrls.length !== 1 ? 's' : ''} detected</span>
           <span className="text-muted-foreground/30">•</span>
           <span className="text-muted-foreground/60">
-            {[...new Set(validUrls.map(u => u.platform))].join(', ')}
+            {Array.from(new Set(validUrls.map(u => u.platform))).join(', ')}
           </span>
         </div>
       )}
