@@ -69,12 +69,32 @@ export function extractVideoId(url: string, platform: Platform): string | null {
 }
 
 export function parseUrls(input: string): UrlInfo[] {
-  const lines = input
+  // First, try to extract URLs using regex (handles URLs split across lines)
+  const urlRegex = /https?:\/\/[^\s]+/gi;
+  
+  // Remove line breaks within URLs by joining lines that don't start with http
+  const cleanedInput = input
     .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+    .reduce((acc: string[], line: string) => {
+      const trimmed = line.trim();
+      if (!trimmed) return acc;
+      
+      // If line starts with http, it's a new URL
+      if (trimmed.match(/^https?:\/\//i)) {
+        acc.push(trimmed);
+      } else if (acc.length > 0) {
+        // Otherwise, append to the previous line (URL was split)
+        acc[acc.length - 1] += trimmed;
+      }
+      return acc;
+    }, []);
 
-  return lines.map((url) => {
+  // Extract URLs from the cleaned input
+  const urls = cleanedInput.length > 0 
+    ? cleanedInput 
+    : (input.match(urlRegex) || []);
+
+  return urls.map((url) => {
     const platform = detectPlatform(url);
     const id = extractVideoId(url, platform);
     return { url, platform, id: id ?? undefined };
