@@ -126,10 +126,10 @@ export function UrlInputForm() {
       return;
     }
 
-    if (urlList.length > 5) {
+    if (urlList.length > 10) {
       toast({
         title: "Too many URLs",
-        description: "Maximum 5 URLs at a time",
+        description: "Maximum 10 URLs at a time",
         variant: "destructive",
       });
       return;

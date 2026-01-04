@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (urls.length > 5) {
+    if (urls.length > 10) {
       return NextResponse.json(
-        { error: "Maximum 5 URLs allowed" },
+        { error: "Maximum 10 URLs allowed" },
         { status: 400 }
       );
     }
