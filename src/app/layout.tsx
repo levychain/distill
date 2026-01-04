@@ -24,6 +24,7 @@ export const viewport: Viewport = {
   themeColor: "#0f1115",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover", // Enable safe area support
 };
 
 export default function RootLayout({
@@ -38,7 +39,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <main className="min-h-screen bg-background">
+          <main className="min-h-screen bg-background pt-safe pb-safe">
             {children}
           </main>
           <Toaster />
