@@ -94,13 +94,29 @@ export function UrlInputForm() {
   const handleInputChange = (value: string, isPaste: boolean = false) => {
     // Parse URLs from input
     const parsed = parseUrls(value);
-    const validNew = parsed.filter((u) => u.platform !== "unknown");
+    let validNew = parsed.filter((u) => u.platform !== "unknown");
     const unsupportedUrls = parsed.filter((u) => u.platform === "unknown");
     
     // Check if input looks like it should contain URLs
     const hasUrlPattern = /https?:\/\//i.test(value);
     const hasContent = value.trim().length > 0;
     
+    // Check for Twitter URLs and show specific error
+    const twitterUrls = validNew.filter(u => u.platform === "twitter");
+    if (twitterUrls.length > 0) {
+      toast({
+        title: "X/Twitter unavailable",
+        description: "X has restricted API access. Try YouTube, TikTok, Instagram, or Farcaster instead.",
+        variant: "destructive",
+      });
+      // Filter out Twitter URLs
+      validNew = validNew.filter(u => u.platform !== "twitter");
+      if (validNew.length === 0) {
+        setInputValue("");
+        return;
+      }
+    }
+
     if (validNew.length > 0) {
       // Add new valid URLs that aren't already in the list
       const existingUrls = new Set(urlList.map(u => u.url));
@@ -123,7 +139,7 @@ export function UrlInputForm() {
       if (unsupportedUrls.length > 0) {
         toast({
           title: "Some URLs skipped",
-          description: "Only YouTube, X, TikTok, Instagram, and Farcaster are supported",
+          description: "Only YouTube, TikTok, Instagram, and Farcaster are supported",
         });
       }
       
@@ -133,7 +149,7 @@ export function UrlInputForm() {
       // User pasted URLs but none are from supported platforms
       toast({
         title: "Unsupported platform",
-        description: "Only YouTube, X, TikTok, Instagram, and Farcaster URLs are supported",
+        description: "Only YouTube, TikTok, Instagram, and Farcaster URLs are supported",
         variant: "destructive",
       });
       setInputValue("");
@@ -141,7 +157,7 @@ export function UrlInputForm() {
       // User pasted text that doesn't look like URLs
       toast({
         title: "No URLs detected",
-        description: "Paste links from YouTube, X, TikTok, Instagram, or Farcaster",
+        description: "Paste links from YouTube, TikTok, Instagram, or Farcaster",
         variant: "destructive",
       });
       setInputValue("");
@@ -196,7 +212,7 @@ export function UrlInputForm() {
     if (urlList.length === 0) {
       toast({
         title: "No valid URLs",
-        description: "Paste links from YouTube, X, TikTok, Instagram, or Farcaster",
+        description: "Paste links from YouTube, TikTok, Instagram, or Farcaster",
         variant: "destructive",
       });
       return;

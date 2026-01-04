@@ -113,12 +113,9 @@ async function processUrlsAsync(
       try {
         let transcript = "";
 
-        // Handle text tweets separately
+        // Handle Twitter/X - currently broken due to API restrictions
         if (urlInfo.platform === "twitter") {
-          const tweetText = await fetchTweetText(urlInfo.url);
-          if (tweetText) {
-            transcript = tweetText;
-          }
+          throw new Error("Twitter/X is temporarily unavailable due to API restrictions. Try YouTube, TikTok, Instagram, or Farcaster instead.");
         }
 
         // Handle Farcaster casts (text-only)
