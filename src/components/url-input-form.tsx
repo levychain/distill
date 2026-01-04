@@ -41,6 +41,14 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
+function FarcasterIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.24 0.24H5.76C2.59 0.24 0 2.83 0 6v12c0 3.17 2.59 5.76 5.76 5.76h12.48c3.17 0 5.76-2.59 5.76-5.76V6c0-3.17-2.59-5.76-5.76-5.76zM19.52 18c0 .84-.68 1.52-1.52 1.52H6c-.84 0-1.52-.68-1.52-1.52V6c0-.84.68-1.52 1.52-1.52h12c.84 0 1.52.68 1.52 1.52v12zM8.22 7.5v9h1.64v-3.75h4.28v3.75h1.64v-9h-1.64v3.75H9.86V7.5H8.22z"/>
+    </svg>
+  );
+}
+
 function getPlatformIcon(platform: string) {
   switch (platform) {
     case 'youtube':
@@ -51,6 +59,8 @@ function getPlatformIcon(platform: string) {
       return <XIcon className="h-4 w-4" />;
     case 'instagram':
       return <InstagramIcon className="h-4 w-4 text-pink-500" />;
+    case 'farcaster':
+      return <FarcasterIcon className="h-4 w-4 text-purple-500" />;
     default:
       return null;
   }
@@ -150,7 +160,7 @@ export function UrlInputForm() {
     if (urlList.length === 0) {
       toast({
         title: "No valid URLs",
-        description: "Paste links from YouTube, X, TikTok, or Instagram",
+        description: "Paste links from YouTube, X, TikTok, Instagram, or Farcaster",
         variant: "destructive",
       });
       return;

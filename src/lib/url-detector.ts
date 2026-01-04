@@ -24,6 +24,11 @@ const INSTAGRAM_PATTERNS = [
   /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/,
 ];
 
+const FARCASTER_PATTERNS = [
+  /(?:https?:\/\/)?(?:www\.)?warpcast\.com\/([^\/]+)\/([a-zA-Z0-9]+)/,
+  /(?:https?:\/\/)?(?:www\.)?farcaster\.xyz\/([^\/]+)\/([a-zA-Z0-9x]+)/,
+];
+
 export function detectPlatform(url: string): Platform {
   if (YOUTUBE_PATTERNS.some((pattern) => pattern.test(url))) {
     return "youtube";
@@ -36,6 +41,9 @@ export function detectPlatform(url: string): Platform {
   }
   if (INSTAGRAM_PATTERNS.some((pattern) => pattern.test(url))) {
     return "instagram";
+  }
+  if (FARCASTER_PATTERNS.some((pattern) => pattern.test(url))) {
+    return "farcaster";
   }
   return "unknown";
 }
@@ -55,6 +63,9 @@ export function extractVideoId(url: string, platform: Platform): string | null {
       break;
     case "instagram":
       patterns = INSTAGRAM_PATTERNS;
+      break;
+    case "farcaster":
+      patterns = FARCASTER_PATTERNS;
       break;
     default:
       return null;
@@ -127,6 +138,8 @@ export function getPlatformDisplayName(platform: Platform): string {
       return "TikTok";
     case "instagram":
       return "Instagram";
+    case "farcaster":
+      return "Farcaster";
     default:
       return "Unknown";
   }

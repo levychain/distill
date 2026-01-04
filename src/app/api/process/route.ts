@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseUrls } from "@/lib/url-detector";
 import { createStudyPage, updateStudyPage, updatePageStatus } from "@/lib/notion";
-import { downloadAudio, fetchTweetText } from "@/lib/video-downloader";
+import { downloadAudio, fetchTweetText, fetchFarcasterCast } from "@/lib/video-downloader";
 import { transcribeAudio } from "@/lib/assemblyai";
 import { generateStudySummary, generateTopicName } from "@/lib/claude";
 import {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (validUrls.length === 0) {
       return NextResponse.json(
-        { error: "No valid URLs detected. Supported platforms: YouTube, X/Twitter, TikTok, Instagram" },
+        { error: "No valid URLs detected. Supported platforms: YouTube, X/Twitter, TikTok, Instagram, Farcaster" },
         { status: 400 }
       );
     }
@@ -121,8 +121,18 @@ async function processUrlsAsync(
           }
         }
 
-        // If no text (or not a text tweet), download and transcribe
-        if (!transcript) {
+        // Handle Farcaster casts (text-only)
+        if (urlInfo.platform === "farcaster") {
+          const castText = await fetchFarcasterCast(urlInfo.url);
+          if (castText) {
+            transcript = castText;
+          } else {
+            throw new Error("Could not fetch Farcaster cast content");
+          }
+        }
+
+        // If no text (or not a text-based platform), download and transcribe
+        if (!transcript && urlInfo.platform !== "farcaster") {
           const { audioPath, cleanup } = await downloadAudio(
             urlInfo.url,
             urlInfo.platform as any

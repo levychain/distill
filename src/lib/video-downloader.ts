@@ -162,6 +162,68 @@ export async function fetchTweetText(tweetUrl: string): Promise<string | null> {
   }
 }
 
+// For Farcaster casts
+export async function fetchFarcasterCast(castUrl: string): Promise<string | null> {
+  try {
+    // Extract username and cast hash from URL
+    // Supports: farcaster.xyz/user/hash and warpcast.com/user/hash
+    const match = castUrl.match(/(?:farcaster\.xyz|warpcast\.com)\/([^\/]+)\/([a-zA-Z0-9x]+)/i);
+    if (!match) return null;
+
+    const [, username, hash] = match;
+
+    // Try Neynar public API (free tier)
+    // Neynar provides cast lookup by hash
+    const neynarResponse = await fetch(
+      `https://api.neynar.com/v2/farcaster/cast?identifier=${hash}&type=hash`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'api_key': 'NEYNAR_API_DOCS', // Public demo key
+        },
+        signal: AbortSignal.timeout(15000),
+      }
+    );
+
+    if (neynarResponse.ok) {
+      const data = await neynarResponse.json();
+      if (data?.cast?.text) {
+        // Include embeds if present (links, images descriptions)
+        let content = data.cast.text;
+        
+        // Add author context
+        const author = data.cast.author?.display_name || data.cast.author?.username || username;
+        content = `[Cast by @${author}]\n\n${content}`;
+        
+        return content;
+      }
+    }
+
+    // Fallback: try to scrape from warpcast
+    const warpcastUrl = `https://warpcast.com/${username}/${hash}`;
+    const response = await fetch(warpcastUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (response.ok) {
+      const html = await response.text();
+      // Try to extract cast text from meta tags or JSON-LD
+      const ogDescMatch = html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]+)"/i);
+      if (ogDescMatch) {
+        return ogDescMatch[1];
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Farcaster fetch error:', error);
+    return null;
+  }
+}
+
 export async function uploadToTemporaryStorage(
   filePath: string
 ): Promise<string> {

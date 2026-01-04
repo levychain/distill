@@ -20,6 +20,7 @@ function getPlatformFromUrl(url: string): string {
   if (url.includes("twitter.com") || url.includes("x.com")) return "X";
   if (url.includes("tiktok.com")) return "TikTok";
   if (url.includes("instagram.com")) return "Instagram";
+  if (url.includes("farcaster.xyz") || url.includes("warpcast.com")) return "Farcaster";
   return "Link";
 }
 
