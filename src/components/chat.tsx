@@ -84,7 +84,10 @@ export function Chat({ context }: ChatProps) {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll when there are messages (not on initial load)
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
