@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, ChevronDown, ChevronUp, BookOpen, ExternalLink } from "lucide-react";
+import { Copy, Check, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import type { SummaryResult, TranscriptResult } from "@/types";
 import { Chat } from "@/components/chat";
 import { motion } from "framer-motion";
@@ -173,20 +173,12 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
             onClick={async () => { 
               await handleCopy(allTranscripts, 'notebooklm'); 
               setShowNotebookLmHelper(true);
+              window.open('https://notebooklm.google.com/', '_blank');
             }}
             className="flex-1 h-11 rounded-xl"
           >
-            <Copy className="mr-2 h-4 w-4" />
-            Copy for NotebookLM
-          </Button>
-
-          <Button 
-            onClick={() => window.open('https://notebooklm.google.com/', '_blank')}
-            variant="secondary"
-            className="h-11 rounded-xl px-4"
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Open
+            <BookOpen className="mr-2 h-4 w-4" />
+            NotebookLM
           </Button>
         </div>
 
