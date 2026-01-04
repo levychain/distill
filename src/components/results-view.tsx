@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Check, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
+import { Copy, Check, ChevronDown, ChevronUp, BookOpen, ExternalLink } from "lucide-react";
 import type { SummaryResult, TranscriptResult } from "@/types";
 import { Chat } from "@/components/chat";
 import { motion } from "framer-motion";
@@ -26,6 +26,14 @@ function getPlatformFromUrl(url: string): string {
 export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], transcripts = [] }: ResultsViewProps) {
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [showNotebookLmHelper, setShowNotebookLmHelper] = useState(false);
+
+  // Auto-hide the helper after a short period.
+  useEffect(() => {
+    if (!showNotebookLmHelper) return;
+    const t = setTimeout(() => setShowNotebookLmHelper(false), 8000);
+    return () => clearTimeout(t);
+  }, [showNotebookLmHelper]);
 
   const successfulTranscripts = transcripts.filter(t => t.success);
 
@@ -158,15 +166,48 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.3 }}
-        className="flex gap-3 pt-4 border-t border-border/50"
+        className="pt-4 border-t border-border/50 space-y-3"
       >
-        <Button 
-          onClick={() => { handleCopy(allTranscripts, 'nlm'); window.open('https://notebooklm.google.com/', '_blank'); }}
-          className="flex-1 h-11 rounded-xl"
-        >
-          <BookOpen className="mr-2 h-4 w-4" />
-          NotebookLM
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            onClick={async () => { 
+              await handleCopy(allTranscripts, 'notebooklm'); 
+              setShowNotebookLmHelper(true);
+            }}
+            className="flex-1 h-11 rounded-xl"
+          >
+            <Copy className="mr-2 h-4 w-4" />
+            Copy for NotebookLM
+          </Button>
+
+          <Button 
+            onClick={() => window.open('https://notebooklm.google.com/', '_blank')}
+            variant="secondary"
+            className="h-11 rounded-xl px-4"
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Open
+          </Button>
+        </div>
+
+        {showNotebookLmHelper && (
+          <div className="rounded-xl border border-border/50 bg-secondary/30 px-4 py-3 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="font-medium">Copied</p>
+                <p className="text-muted-foreground">
+                  Open NotebookLM and paste into a new notebook. If you’re already signed into Google in this browser, it’s faster.
+                </p>
+              </div>
+              <button
+                onClick={async () => { await handleCopy(allTranscripts, 'notebooklm'); }}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-secondary/50 whitespace-nowrap"
+              >
+                Copy again
+              </button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Chat */}
