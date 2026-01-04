@@ -80,6 +80,12 @@ export function UrlInputForm() {
     setUserId(getUserId());
   }, []);
 
+  // Make input feel "ready" by focusing on mount when possible.
+  // Note: iOS Safari may ignore programmatic focus; this is best-effort.
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
+
   const handleInputChange = (value: string) => {
     setInputValue(value);
     
@@ -107,6 +113,35 @@ export function UrlInputForm() {
       
       // Clear input after processing
       setInputValue("");
+    }
+  };
+
+  const focusInput = () => {
+    textareaRef.current?.focus();
+  };
+
+  const clearAll = () => {
+    setUrlList([]);
+    setInputValue("");
+    focusInput();
+  };
+
+  const pasteFromClipboard = async () => {
+    try {
+      // Clipboard read requires a user gesture + permissions. This is called from a button press.
+      const text = await navigator.clipboard.readText();
+      if (!text?.trim()) {
+        toast({ title: "Nothing to paste", description: "Your clipboard is empty" });
+        return;
+      }
+      handleInputChange(text);
+      focusInput();
+    } catch {
+      toast({
+        title: "Paste unavailable",
+        description: "Use your keyboard paste or long-press to paste",
+      });
+      focusInput();
     }
   };
 
@@ -166,7 +201,20 @@ export function UrlInputForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-secondary/30 border border-border/50 rounded-2xl overflow-hidden">
+      <div
+        className="bg-secondary/30 border border-border/50 rounded-2xl overflow-hidden"
+        onMouseDown={(e) => {
+          // Make the whole container tappable without stealing focus from interactive children.
+          const target = e.target as HTMLElement;
+          if (target.closest("button")) return;
+          focusInput();
+        }}
+        onTouchStart={(e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest("button")) return;
+          focusInput();
+        }}
+      >
         {/* URL Badges */}
         <AnimatePresence>
           {urlList.length > 0 && (
@@ -210,28 +258,63 @@ export function UrlInputForm() {
         </AnimatePresence>
         
         {/* Input Area */}
-        <textarea
-          ref={textareaRef}
-          placeholder={urlList.length > 0 ? "Paste more URLs..." : "Paste video URLs here..."}
-          value={inputValue}
-          onChange={(e) => handleInputChange(e.target.value)}
-          onKeyDown={(e) => {
-            // Cmd+A to select all
-            if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
-              e.preventDefault();
-              e.currentTarget.select();
+        <div className="relative">
+          {/* Inline actions */}
+          <div className="absolute right-3 top-3 flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={pasteFromClipboard}
+              disabled={isLoading}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-secondary/50"
+            >
+              Paste
+            </button>
+            {urlList.length > 0 && (
+              <button
+                type="button"
+                onClick={clearAll}
+                disabled={isLoading}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 rounded-md hover:bg-secondary/50"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          <textarea
+            ref={textareaRef}
+            placeholder={
+              urlList.length > 0 ? "Paste more URLs..." : "Paste video URLs here..."
             }
-            // Backspace/Delete when input is empty removes last URL
-            if ((e.key === 'Backspace' || e.key === 'Delete') && inputValue === '' && urlList.length > 0) {
-              e.preventDefault();
-              setUrlList(prev => prev.slice(0, -1));
-            }
-          }}
-          className={`w-full bg-transparent px-5 py-4 text-sm resize-none focus:outline-none placeholder:text-muted-foreground/50 ${
-            urlList.length > 0 ? 'min-h-[60px]' : 'min-h-[120px]'
-          }`}
-          disabled={isLoading}
-        />
+            value={inputValue}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              // Cmd+A to select all
+              if ((e.metaKey || e.ctrlKey) && e.key === "a") {
+                e.preventDefault();
+                e.currentTarget.select();
+              }
+              // Backspace/Delete when input is empty removes last URL
+              if (
+                (e.key === "Backspace" || e.key === "Delete") &&
+                inputValue === "" &&
+                urlList.length > 0
+              ) {
+                e.preventDefault();
+                setUrlList((prev) => prev.slice(0, -1));
+              }
+            }}
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            className={`w-full bg-transparent px-5 py-4 pr-24 resize-none focus:outline-none placeholder:text-muted-foreground/50 ${
+              // Prevent iOS zoom: 16px on mobile, smaller on desktop.
+              "text-base sm:text-sm"
+            } ${urlList.length > 0 ? "min-h-[60px]" : "min-h-[120px]"}`}
+            disabled={isLoading}
+          />
+        </div>
       </div>
 
       <button
