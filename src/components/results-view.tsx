@@ -65,7 +65,7 @@ export function ResultsView({ sessionId, notionPageUrl, summary, urls = [], tran
           {urls.length > 1 && (
             <button
               onClick={() => handleCopy(urls.join('\n'), 'urls')}
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-secondary/50"
             >
               {copied === 'urls' ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
               <span>Copy all</span>

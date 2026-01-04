@@ -126,7 +126,7 @@ export function Chat({ context }: ChatProps) {
       {/* Header */}
       <div className="px-5 py-3 border-b border-border/50">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Ask Follow-up (GPT)
+          Ask Follow-up
         </span>
       </div>
 
