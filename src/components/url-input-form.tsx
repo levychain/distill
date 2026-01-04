@@ -97,6 +97,11 @@ export function UrlInputForm() {
     // Parse URLs from input
     const parsed = parseUrls(value);
     const validNew = parsed.filter((u) => u.platform !== "unknown");
+    const unsupportedUrls = parsed.filter((u) => u.platform === "unknown");
+    
+    // Check if input looks like it should contain URLs
+    const hasUrlPattern = /https?:\/\//i.test(value);
+    const hasContent = value.trim().length > 0;
     
     if (validNew.length > 0) {
       // Add new valid URLs that aren't already in the list
@@ -116,7 +121,31 @@ export function UrlInputForm() {
         });
       }
       
+      // Warn about unsupported URLs if any
+      if (unsupportedUrls.length > 0) {
+        toast({
+          title: "Some URLs skipped",
+          description: "Only YouTube, X, TikTok, Instagram, and Farcaster are supported",
+        });
+      }
+      
       // Clear input after processing
+      setInputValue("");
+    } else if (hasUrlPattern && unsupportedUrls.length > 0) {
+      // User pasted URLs but none are from supported platforms
+      toast({
+        title: "Unsupported platform",
+        description: "Only YouTube, X, TikTok, Instagram, and Farcaster URLs are supported",
+        variant: "destructive",
+      });
+      setInputValue("");
+    } else if (hasContent && !hasUrlPattern && value.length > 10) {
+      // User pasted text that doesn't look like URLs
+      toast({
+        title: "No URLs detected",
+        description: "Paste links from YouTube, X, TikTok, Instagram, or Farcaster",
+        variant: "destructive",
+      });
       setInputValue("");
     }
   };
