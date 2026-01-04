@@ -11,7 +11,7 @@ const config: CapacitorConfig = {
     cleartext: false,
   },
   ios: {
-    contentInset: 'automatic',
+    contentInset: 'never', // Disable native insets, use CSS safe-area instead
     backgroundColor: '#0f1115', // Match your dark theme
   },
 };
