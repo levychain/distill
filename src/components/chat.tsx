@@ -206,7 +206,7 @@ export function Chat({ context }: ChatProps) {
             }}
             placeholder="Type a message..."
             rows={1}
-            className="flex-1 bg-secondary/50 text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50"
+            className="flex-1 bg-secondary/50 text-base sm:text-sm rounded-xl px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/50"
             style={{ minHeight: "44px", maxHeight: "120px" }}
           />
           <button
