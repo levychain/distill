@@ -9,11 +9,6 @@ const YOUTUBE_PATTERNS = [
   /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
 ];
 
-const TWITTER_PATTERNS = [
-  /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/\w+\/status\/(\d+)/,
-  /(?:https?:\/\/)?(?:www\.)?(?:twitter|x)\.com\/\w+\/statuses\/(\d+)/,
-];
-
 const TIKTOK_PATTERNS = [
   /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/(\d+)/,
   /(?:https?:\/\/)?(?:vm\.)?tiktok\.com\/(\w+)/,
@@ -33,9 +28,6 @@ export function detectPlatform(url: string): Platform {
   if (YOUTUBE_PATTERNS.some((pattern) => pattern.test(url))) {
     return "youtube";
   }
-  if (TWITTER_PATTERNS.some((pattern) => pattern.test(url))) {
-    return "twitter";
-  }
   if (TIKTOK_PATTERNS.some((pattern) => pattern.test(url))) {
     return "tiktok";
   }
@@ -54,9 +46,6 @@ export function extractVideoId(url: string, platform: Platform): string | null {
   switch (platform) {
     case "youtube":
       patterns = YOUTUBE_PATTERNS;
-      break;
-    case "twitter":
-      patterns = TWITTER_PATTERNS;
       break;
     case "tiktok":
       patterns = TIKTOK_PATTERNS;
@@ -136,8 +125,6 @@ export function getPlatformDisplayName(platform: Platform): string {
   switch (platform) {
     case "youtube":
       return "YouTube";
-    case "twitter":
-      return "X (Twitter)";
     case "tiktok":
       return "TikTok";
     case "instagram":

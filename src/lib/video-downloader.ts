@@ -61,10 +61,6 @@ function buildDownloadCommand(
 
   // Platform-specific options
   switch (platform) {
-    case "twitter":
-      // Twitter/X may need cookies or specific user agent
-      return `${baseCommand} --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" "${url}"`;
-
     case "tiktok":
       // TikTok may need specific handling
       return `${baseCommand} --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" "${url}"`;
@@ -140,27 +136,6 @@ export async function downloadVideoAsFile(
   }
 }
 
-// For text-only tweets
-export async function fetchTweetText(tweetUrl: string): Promise<string | null> {
-  try {
-    // Use yt-dlp to get tweet info
-    const { stdout } = await execAsync(
-      `yt-dlp --dump-json --no-download "${tweetUrl}"`,
-      { timeout: 30000 }
-    );
-
-    const info = JSON.parse(stdout);
-
-    // If there's a description but no video, it's a text tweet
-    if (info.description && !info.formats?.length) {
-      return info.description;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
 
 // For Farcaster casts
 export async function fetchFarcasterCast(castUrl: string): Promise<string | null> {

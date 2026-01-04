@@ -1,4 +1,4 @@
-export type Platform = "youtube" | "twitter" | "tiktok" | "instagram" | "farcaster" | "unknown";
+export type Platform = "youtube" | "tiktok" | "instagram" | "farcaster" | "unknown";
 
 export type ProcessingStatus = "pending" | "processing" | "complete" | "failed";
 

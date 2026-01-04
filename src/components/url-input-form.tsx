@@ -25,13 +25,6 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  );
-}
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -55,8 +48,6 @@ function getPlatformIcon(platform: string) {
       return <YouTubeIcon className="h-4 w-4 text-red-500" />;
     case 'tiktok':
       return <TikTokIcon className="h-4 w-4" />;
-    case 'twitter':
-      return <XIcon className="h-4 w-4" />;
     case 'instagram':
       return <InstagramIcon className="h-4 w-4 text-pink-500" />;
     case 'farcaster':
@@ -94,29 +85,13 @@ export function UrlInputForm() {
   const handleInputChange = (value: string, isPaste: boolean = false) => {
     // Parse URLs from input
     const parsed = parseUrls(value);
-    let validNew = parsed.filter((u) => u.platform !== "unknown");
+    const validNew = parsed.filter((u) => u.platform !== "unknown");
     const unsupportedUrls = parsed.filter((u) => u.platform === "unknown");
     
     // Check if input looks like it should contain URLs
     const hasUrlPattern = /https?:\/\//i.test(value);
     const hasContent = value.trim().length > 0;
     
-    // Check for Twitter URLs and show specific error
-    const twitterUrls = validNew.filter(u => u.platform === "twitter");
-    if (twitterUrls.length > 0) {
-      toast({
-        title: "X/Twitter unavailable",
-        description: "X has restricted API access. Try YouTube, TikTok, Instagram, or Farcaster instead.",
-        variant: "destructive",
-      });
-      // Filter out Twitter URLs
-      validNew = validNew.filter(u => u.platform !== "twitter");
-      if (validNew.length === 0) {
-        setInputValue("");
-        return;
-      }
-    }
-
     if (validNew.length > 0) {
       // Add new valid URLs that aren't already in the list
       const existingUrls = new Set(urlList.map(u => u.url));

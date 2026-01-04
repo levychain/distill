@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parseUrls } from "@/lib/url-detector";
 import { createStudyPage, updateStudyPage, updatePageStatus } from "@/lib/notion";
-import { downloadAudio, fetchTweetText, fetchFarcasterCast } from "@/lib/video-downloader";
+import { downloadAudio, fetchFarcasterCast } from "@/lib/video-downloader";
 import { transcribeAudio } from "@/lib/assemblyai";
 import { generateStudySummary, generateTopicName } from "@/lib/claude";
 import {
@@ -112,11 +112,6 @@ async function processUrlsAsync(
 
       try {
         let transcript = "";
-
-        // Handle Twitter/X - currently broken due to API restrictions
-        if (urlInfo.platform === "twitter") {
-          throw new Error("Twitter/X is temporarily unavailable due to API restrictions. Try YouTube, TikTok, Instagram, or Farcaster instead.");
-        }
 
         // Handle Farcaster casts (text-only)
         if (urlInfo.platform === "farcaster") {
