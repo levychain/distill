@@ -40,7 +40,7 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen pt-safe pb-safe">
-      <div className="container mx-auto px-6 py-6 max-w-2xl">
+      <div className="container mx-auto px-6 pt-2 pb-8 max-w-2xl">
         {/* Header */}
         <header className="mb-6 space-y-3">
           <Link 
