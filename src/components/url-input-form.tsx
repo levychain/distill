@@ -91,12 +91,22 @@ export function UrlInputForm() {
       // Add new valid URLs that aren't already in the list
       const existingUrls = new Set(urlList.map(u => u.url));
       const newUrls = validNew.filter(u => !existingUrls.has(u.url));
+      const duplicateCount = validNew.length - newUrls.length;
       
       if (newUrls.length > 0) {
         setUrlList(prev => [...prev, ...newUrls]);
-        // Clear input after promoting URLs
-        setInputValue("");
       }
+      
+      // Show feedback for duplicates
+      if (duplicateCount > 0 && newUrls.length === 0) {
+        toast({
+          title: "Already added",
+          description: duplicateCount === 1 ? "This URL is already in your list" : `${duplicateCount} URLs already in your list`,
+        });
+      }
+      
+      // Clear input after processing
+      setInputValue("");
     }
   };
 
