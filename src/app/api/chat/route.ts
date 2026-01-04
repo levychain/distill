@@ -53,10 +53,11 @@ Answer questions based on this content. If asked something not covered, say so b
     }
 
     return NextResponse.json({ response: content });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Chat API error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to get response" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

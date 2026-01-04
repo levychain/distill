@@ -106,14 +106,18 @@ export function Chat({ context }: ChatProps) {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to get response");
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to get response");
+      }
+      
       setMessages((prev) => [...prev, { role: "assistant", content: data.response }]);
-    } catch {
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Something went wrong";
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Something went wrong. Try again." },
+        { role: "assistant", content: `Error: ${errorMsg}` },
       ]);
     } finally {
       setIsLoading(false);
