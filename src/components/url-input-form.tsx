@@ -91,9 +91,7 @@ export function UrlInputForm() {
     textareaRef.current?.focus();
   }, []);
 
-  const handleInputChange = (value: string) => {
-    setInputValue(value);
-    
+  const handleInputChange = (value: string, isPaste: boolean = false) => {
     // Parse URLs from input
     const parsed = parseUrls(value);
     const validNew = parsed.filter((u) => u.platform !== "unknown");
@@ -131,7 +129,7 @@ export function UrlInputForm() {
       
       // Clear input after processing
       setInputValue("");
-    } else if (hasUrlPattern && unsupportedUrls.length > 0) {
+    } else if (isPaste && hasUrlPattern && unsupportedUrls.length > 0) {
       // User pasted URLs but none are from supported platforms
       toast({
         title: "Unsupported platform",
@@ -139,7 +137,7 @@ export function UrlInputForm() {
         variant: "destructive",
       });
       setInputValue("");
-    } else if (hasContent && !hasUrlPattern && value.length > 10) {
+    } else if (isPaste && hasContent && !hasUrlPattern) {
       // User pasted text that doesn't look like URLs
       toast({
         title: "No URLs detected",
@@ -147,7 +145,16 @@ export function UrlInputForm() {
         variant: "destructive",
       });
       setInputValue("");
+    } else {
+      // Just typing - allow it but don't process yet
+      setInputValue(value);
     }
+  };
+  
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text");
+    handleInputChange(pastedText, true);
   };
 
   const focusInput = () => {
@@ -168,7 +175,7 @@ export function UrlInputForm() {
         toast({ title: "Nothing to paste", description: "Your clipboard is empty" });
         return;
       }
-      handleInputChange(text);
+      handleInputChange(text, true);
       focusInput();
     } catch {
       toast({
@@ -331,7 +338,8 @@ export function UrlInputForm() {
               urlList.length > 0 ? "Paste more URLs..." : "Paste video URLs here..."
             }
             value={inputValue}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value, false)}
+            onPaste={handlePaste}
             onKeyDown={(e) => {
               // Cmd+A to select all
               if ((e.metaKey || e.ctrlKey) && e.key === "a") {
