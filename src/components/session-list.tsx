@@ -136,17 +136,17 @@ export function SessionList() {
             >
               <Link
                 href={`/results/${session.id}`}
-                className="flex items-center justify-between p-3 -mx-3 rounded-xl hover:bg-secondary/50 transition-colors group"
+                className="flex items-center gap-3 p-3 -mx-3 rounded-xl hover:bg-secondary/50 transition-colors group"
               >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-sm">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <p className="font-medium text-sm truncate">
                     {session.topicName}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {session.urlCount} source{session.urlCount !== 1 ? "s" : ""} • {formatDate(session.createdAt)}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <StatusBadge status={session.status} />
                   <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
                 </div>
