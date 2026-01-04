@@ -82,8 +82,12 @@ export function extractVideoId(url: string, platform: Platform): string | null {
 }
 
 export function parseUrls(input: string): UrlInfo[] {
+  // First, split concatenated URLs by inserting spaces before http(s)://
+  // This handles cases like "https://url1https://url2" -> "https://url1 https://url2"
+  let processedInput = input.replace(/(https?:\/\/)/gi, ' $1').trim();
+  
   // Pre-process: join lines that are continuations of URLs (don't start with http)
-  const lines = input.split('\n');
+  const lines = processedInput.split('\n');
   const processedLines: string[] = [];
   
   for (const line of lines) {

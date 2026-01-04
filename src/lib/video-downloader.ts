@@ -172,34 +172,32 @@ export async function fetchFarcasterCast(castUrl: string): Promise<string | null
 
     const [, username, hash] = match;
 
-    // Try Neynar public API (free tier)
-    // Neynar provides cast lookup by hash
-    const neynarResponse = await fetch(
-      `https://api.neynar.com/v2/farcaster/cast?identifier=${hash}&type=hash`,
-      {
+    // Method 1: Try Neynar API with env key (use type=url since we only have short hash)
+    const neynarApiKey = process.env.NEYNAR_API_KEY || 'NEYNAR_API_DOCS';
+    const neynarCastUrl = `https://warpcast.com/${username}/${hash}`;
+    const neynarUrl = `https://api.neynar.com/v2/farcaster/cast?identifier=${encodeURIComponent(neynarCastUrl)}&type=url`;
+
+    try {
+      const neynarResponse = await fetch(neynarUrl, {
         headers: {
           'Accept': 'application/json',
-          'api_key': 'NEYNAR_API_DOCS', // Public demo key
+          'api_key': neynarApiKey,
         },
         signal: AbortSignal.timeout(15000),
-      }
-    );
+      });
 
-    if (neynarResponse.ok) {
-      const data = await neynarResponse.json();
-      if (data?.cast?.text) {
-        // Include embeds if present (links, images descriptions)
-        let content = data.cast.text;
-        
-        // Add author context
-        const author = data.cast.author?.display_name || data.cast.author?.username || username;
-        content = `[Cast by @${author}]\n\n${content}`;
-        
-        return content;
+      if (neynarResponse.ok) {
+        const data = await neynarResponse.json();
+        if (data?.cast?.text) {
+          const author = data.cast.author?.display_name || data.cast.author?.username || username;
+          return `[Cast by @${author}]\n\n${data.cast.text}`;
+        }
       }
+    } catch (e) {
+      // Continue to fallback
     }
 
-    // Fallback: try to scrape from warpcast
+    // Fallback: try to scrape from warpcast meta tags
     const warpcastUrl = `https://warpcast.com/${username}/${hash}`;
     const response = await fetch(warpcastUrl, {
       headers: {
@@ -210,11 +208,18 @@ export async function fetchFarcasterCast(castUrl: string): Promise<string | null
 
     if (response.ok) {
       const html = await response.text();
-      // Try to extract cast text from meta tags or JSON-LD
+
+      // Try og:description
       const ogDescMatch = html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]+)"/i);
-      if (ogDescMatch) {
-        return ogDescMatch[1];
-      }
+      if (ogDescMatch) return ogDescMatch[1];
+
+      // Try twitter:description
+      const twitterDescMatch = html.match(/<meta[^>]*name="twitter:description"[^>]*content="([^"]+)"/i);
+      if (twitterDescMatch) return twitterDescMatch[1];
+
+      // Try description meta tag
+      const descMatch = html.match(/<meta[^>]*name="description"[^>]*content="([^"]+)"/i);
+      if (descMatch) return descMatch[1];
     }
 
     return null;

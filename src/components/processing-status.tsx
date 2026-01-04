@@ -39,13 +39,17 @@ export function ProcessingStatus({
     let mounted = true;
     let timeoutId: NodeJS.Timeout;
 
-    const pollStatus = async () => {
-      try {
-        const response = await fetch(`/api/status/${sessionId}`);
+const pollStatus = async () => {
+             try {
+               const response = await fetch(`/api/status/${sessionId}`);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch status");
-        }
+               if (response.status === 404) {
+                 throw new Error("Session not found. The server may have restarted. Please go back and try again.");
+               }
+               
+               if (!response.ok) {
+                 throw new Error("Failed to fetch status");
+               }
 
         const data: StatusResponse = await response.json();
 
@@ -90,33 +94,47 @@ export function ProcessingStatus({
   const current = progress?.current ?? 0;
   const total = progress?.total ?? 1;
   const stageText = formatStage(progress?.stage);
+  
+  // Calculate progress percentage
+  // Each URL has roughly 3 stages: download, transcribe, then final summary
+  // So we estimate: (current / total) gives us base progress
+  // Add a small amount for the current item being processed
+  const baseProgress = total > 0 ? (current / total) * 100 : 0;
+  const stageBonus = stageText.toLowerCase().includes('almost') ? 90 : 
+                     stageText.toLowerCase().includes('summary') ? 85 :
+                     baseProgress + (100 / total) * 0.5;
+  const displayProgress = Math.min(Math.max(baseProgress, stageBonus > baseProgress ? stageBonus : baseProgress + 5), 95);
 
   return (
     <div className="text-center py-20 space-y-8">
-      {/* Simple pulsing dots */}
-      <div className="flex items-center justify-center gap-2">
-        <span 
-          className="w-2 h-2 rounded-full bg-primary animate-pulse"
-          style={{ animationDelay: '0ms' }}
-        />
-        <span 
-          className="w-2 h-2 rounded-full bg-primary animate-pulse"
-          style={{ animationDelay: '150ms' }}
-        />
-        <span 
-          className="w-2 h-2 rounded-full bg-primary animate-pulse"
-          style={{ animationDelay: '300ms' }}
-        />
-      </div>
-
-      {/* Stage text */}
-      <div className="space-y-1">
-        <p className="text-lg font-medium">{stageText}</p>
+      {/* Combined stage + count */}
+      <p className="text-lg font-medium text-muted-foreground">
+        {stageText}
         {total > 1 && (
-          <p className="text-sm text-muted-foreground">
-            {current} of {total}
-          </p>
+          <span className="text-foreground"> · {Math.min(current + 1, total)} of {total}</span>
         )}
+      </p>
+
+      {/* Progress bar with shimmer animation */}
+      <div className="max-w-xs mx-auto">
+        <div className="h-1 bg-secondary/30 rounded-full overflow-hidden">
+          <div 
+            className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+            style={{ 
+              width: `${displayProgress}%`,
+              background: 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%)'
+            }}
+          >
+            {/* Shimmer overlay */}
+            <div 
+              className="absolute inset-0 animate-shimmer"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                backgroundSize: '200% 100%',
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,14 @@
 /**
  * Local history management using localStorage
- * Stores session metadata only (not transcripts/full content)
+ * Stores session metadata and full results for offline access
  */
 
+import type { SummaryResult, TranscriptResult } from "@/types";
+
 const HISTORY_KEY = "distill_history";
+const RESULTS_KEY = "distill_results";
 const MAX_HISTORY_ITEMS = 50;
+const MAX_RESULTS_ITEMS = 20; // Store fewer full results due to size
 
 export interface LocalSession {
   id: string;
@@ -13,6 +17,16 @@ export interface LocalSession {
   status: "pending" | "processing" | "complete" | "failed";
   createdAt: string;
   notionPageUrl?: string;
+}
+
+export interface LocalResult {
+  sessionId: string;
+  topicName: string;
+  notionPageUrl: string;
+  summary: SummaryResult;
+  urls: string[];
+  transcripts: TranscriptResult[];
+  savedAt: string;
 }
 
 /**
@@ -104,8 +118,54 @@ export function clearLocalHistory(): void {
   
   try {
     localStorage.removeItem(HISTORY_KEY);
+    localStorage.removeItem(RESULTS_KEY);
   } catch (error) {
     console.error("Failed to clear local history:", error);
+  }
+}
+
+/**
+ * Save full session results to localStorage
+ */
+export function saveSessionResult(result: LocalResult): void {
+  if (typeof window === "undefined") return;
+  
+  try {
+    const stored = localStorage.getItem(RESULTS_KEY);
+    const results: LocalResult[] = stored ? JSON.parse(stored) : [];
+    
+    // Check if result already exists
+    const existingIndex = results.findIndex(r => r.sessionId === result.sessionId);
+    
+    if (existingIndex >= 0) {
+      results[existingIndex] = result;
+    } else {
+      results.unshift(result);
+    }
+    
+    // Cap at max items
+    const trimmed = results.slice(0, MAX_RESULTS_ITEMS);
+    
+    localStorage.setItem(RESULTS_KEY, JSON.stringify(trimmed));
+  } catch (error) {
+    console.error("Failed to save session result:", error);
+  }
+}
+
+/**
+ * Get session result from localStorage
+ */
+export function getSessionResult(sessionId: string): LocalResult | null {
+  if (typeof window === "undefined") return null;
+  
+  try {
+    const stored = localStorage.getItem(RESULTS_KEY);
+    if (!stored) return null;
+    
+    const results: LocalResult[] = JSON.parse(stored);
+    return results.find(r => r.sessionId === sessionId) || null;
+  } catch {
+    return null;
   }
 }
 
