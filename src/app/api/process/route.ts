@@ -16,14 +16,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body: ProcessRequest = await request.json();
-    const { urls, topicName, userId } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID required" },
-        { status: 400 }
-      );
-    }
+    const { urls, topicName } = body;
 
     if (!urls || urls.length === 0) {
       return NextResponse.json(
@@ -63,7 +56,6 @@ export async function POST(request: NextRequest) {
     const sessionId = generateSessionId();
     createSession(
       sessionId,
-      userId,
       sessionTopicName,
       validUrls.map((u) => u.url),
       pageId,
@@ -75,6 +67,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       sessionId,
+      topicName: sessionTopicName,
       notionPageId: pageId,
       notionPageUrl: pageUrl,
     });

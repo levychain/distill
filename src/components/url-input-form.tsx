@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { parseUrls, type UrlInfo } from "@/lib/url-detector";
-import { getUserId } from "@/lib/user-id";
+import { saveToLocalHistory } from "@/lib/local-history";
 import { Loader2, ArrowRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -71,14 +71,9 @@ export function UrlInputForm() {
   const [urlList, setUrlList] = useState<UrlInfo[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState<string>("");
   const router = useRouter();
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    setUserId(getUserId());
-  }, []);
 
   // Make input feel "ready" by focusing on mount when possible.
   // Note: iOS Safari may ignore programmatic focus; this is best-effort.
@@ -178,7 +173,6 @@ export function UrlInputForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           urls: urlList.map((u) => u.url),
-          userId,
         }),
       });
 
@@ -188,6 +182,17 @@ export function UrlInputForm() {
       }
 
       const data = await response.json();
+      
+      // Save to local history immediately
+      saveToLocalHistory({
+        id: data.sessionId,
+        topicName: data.topicName || "Processing...",
+        urlCount: urlList.length,
+        status: "processing",
+        createdAt: new Date().toISOString(),
+        notionPageUrl: data.notionPageUrl,
+      });
+      
       router.push(`/results/${data.sessionId}`);
     } catch (error) {
       toast({

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ProcessingStatus } from "@/components/processing-status";
 import { ResultsView } from "@/components/results-view";
+import { updateLocalHistory } from "@/lib/local-history";
 import { ArrowLeft } from "lucide-react";
 import type { StatusResponse } from "@/types";
 
@@ -17,10 +18,24 @@ export default function ResultsPage() {
 
   const handleComplete = (data: StatusResponse["result"]) => {
     setResult(data);
+    
+    // Update local history with final data
+    if (data) {
+      updateLocalHistory(sessionId, {
+        topicName: data.topicName || "Untitled",
+        status: "complete",
+        notionPageUrl: data.notionPageUrl,
+      });
+    }
   };
 
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
+    
+    // Update local history with failed status
+    updateLocalHistory(sessionId, {
+      status: "failed",
+    });
   };
 
   return (
