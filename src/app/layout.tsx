@@ -39,7 +39,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AuthProvider>
-          <main className="min-h-screen bg-background pt-safe pb-safe">
+          <main className="min-h-screen bg-background">
             {children}
           </main>
           <Toaster />

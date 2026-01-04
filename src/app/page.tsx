@@ -3,8 +3,8 @@ import { SessionList } from "@/components/session-list";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-6 py-16 max-w-2xl">
+    <div className="min-h-screen pt-safe pb-safe">
+      <div className="container mx-auto px-6 py-12 max-w-2xl">
         {/* Header */}
         <header className="text-center mb-12">
           <h1 className="text-3xl font-semibold tracking-tight mb-2">Distill</h1>

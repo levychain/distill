@@ -39,10 +39,10 @@ export default function ResultsPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-6 py-8 max-w-2xl">
+    <div className="min-h-screen pt-safe pb-safe">
+      <div className="container mx-auto px-6 py-6 max-w-2xl">
         {/* Header */}
-        <header className="mb-8 space-y-4">
+        <header className="mb-6 space-y-3">
           <Link 
             href="/"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
