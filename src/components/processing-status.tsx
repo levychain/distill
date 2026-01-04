@@ -10,19 +10,22 @@ interface ProcessingStatusProps {
   onError: (error: string) => void;
 }
 
-const loadingMessages = [
-  "Downloading content...",
-  "Extracting audio...",
-  "Transcribing...",
-  "Almost done...",
-];
-
-function formatStage(stage: string | undefined): string {
-  if (!stage) return "Processing...";
+function formatStage(stage: string | undefined, current: number, total: number): string {
+  if (!stage) return "Processing";
+  
   // Remove mentions of "Claude" or technical details
-  if (stage.toLowerCase().includes('claude')) return "Generating summary...";
-  if (stage.toLowerCase().includes('summary')) return "Almost done...";
-  return stage;
+  if (stage.toLowerCase().includes('claude')) return "Generating summary";
+  if (stage.toLowerCase().includes('summary')) return "Almost done";
+  
+  // Clean up the stage text - remove (x/y) since we show it separately
+  let cleaned = stage.replace(/\s*\(\d+\/\d+\)\s*/g, '').trim();
+  
+  // Capitalize platform names
+  cleaned = cleaned.replace(/tiktok/gi, 'TikTok')
+    .replace(/youtube/gi, 'YouTube')
+    .replace(/instagram/gi, 'Instagram');
+  
+  return cleaned;
 }
 
 export function ProcessingStatus({
@@ -32,15 +35,6 @@ export function ProcessingStatus({
 }: ProcessingStatusProps) {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [dots, setDots] = useState(0);
-
-  // Animated dots
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots(d => (d + 1) % 4);
-    }, 400);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -94,7 +88,9 @@ export function ProcessingStatus({
     );
   }
 
-  const stageText = formatStage(progress?.stage);
+  const current = progress?.current ?? 0;
+  const total = progress?.total ?? 1;
+  const stageText = formatStage(progress?.stage, current, total);
 
   return (
     <div className="text-center py-20 space-y-8">
@@ -119,19 +115,17 @@ export function ProcessingStatus({
         <div className="absolute inset-2 rounded-full bg-primary/10" />
       </div>
 
-      {/* Stage text with animated dots */}
+      {/* Stage text */}
       <motion.div
         key={stageText}
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2"
+        className="space-y-1"
       >
-        <p className="text-lg font-medium">
-          {stageText.replace('...', '')}<span className="text-primary">{'.'.repeat(dots + 1)}</span>
-        </p>
-        {progress && progress.total > 1 && (
+        <p className="text-lg font-medium">{stageText}</p>
+        {total > 1 && (
           <p className="text-sm text-muted-foreground">
-            {progress.current} of {progress.total} sources
+            {current} of {total}
           </p>
         )}
       </motion.div>
