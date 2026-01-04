@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import type { StatusResponse } from "@/types";
 
 interface ProcessingStatusProps {
@@ -10,7 +9,7 @@ interface ProcessingStatusProps {
   onError: (error: string) => void;
 }
 
-function formatStage(stage: string | undefined, current: number, total: number): string {
+function formatStage(stage: string | undefined): string {
   if (!stage) return "Processing";
   
   // Remove mentions of "Claude" or technical details
@@ -90,45 +89,35 @@ export function ProcessingStatus({
 
   const current = progress?.current ?? 0;
   const total = progress?.total ?? 1;
-  const stageText = formatStage(progress?.stage, current, total);
+  const stageText = formatStage(progress?.stage);
 
   return (
     <div className="text-center py-20 space-y-8">
-      {/* Animated pulsing rings */}
-      <div className="relative w-16 h-16 mx-auto">
-        <motion.div
-          className="absolute inset-0 rounded-full border-2 border-primary/30"
-          animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+      {/* Simple pulsing dots */}
+      <div className="flex items-center justify-center gap-2">
+        <span 
+          className="w-2 h-2 rounded-full bg-primary animate-pulse"
+          style={{ animationDelay: '0ms' }}
         />
-        <motion.div
-          className="absolute inset-0 rounded-full border-2 border-primary/30"
-          animate={{ scale: [1, 1.5, 1.5], opacity: [0.5, 0, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+        <span 
+          className="w-2 h-2 rounded-full bg-primary animate-pulse"
+          style={{ animationDelay: '150ms' }}
         />
-        <motion.div
-          className="absolute inset-0 rounded-full border-2 border-primary"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          style={{ borderTopColor: 'transparent', borderRightColor: 'transparent' }}
+        <span 
+          className="w-2 h-2 rounded-full bg-primary animate-pulse"
+          style={{ animationDelay: '300ms' }}
         />
-        <div className="absolute inset-2 rounded-full bg-primary/10" />
       </div>
 
       {/* Stage text */}
-      <motion.div
-        key={stageText}
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-1"
-      >
+      <div className="space-y-1">
         <p className="text-lg font-medium">{stageText}</p>
         {total > 1 && (
           <p className="text-sm text-muted-foreground">
             {current} of {total}
           </p>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }
