@@ -1,7 +1,16 @@
+"use client";
+
+import { useState, useCallback } from "react";
 import { UrlInputForm } from "@/components/url-input-form";
 import { SessionList } from "@/components/session-list";
 
 export default function HomePage() {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
+  const handleSessionCreated = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
   return (
     <div className="min-h-screen pt-safe pb-safe">
       <div className="container mx-auto px-6 pt-2 sm:pt-12 pb-8 max-w-2xl">
@@ -15,8 +24,8 @@ export default function HomePage() {
 
         {/* Main Content */}
         <div className="space-y-10">
-          <UrlInputForm />
-          <SessionList />
+          <UrlInputForm onSessionCreated={handleSessionCreated} />
+          <SessionList refreshTrigger={refreshTrigger} />
         </div>
       </div>
     </div>

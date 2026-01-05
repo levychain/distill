@@ -17,6 +17,11 @@ export interface LocalSession {
   status: "pending" | "processing" | "complete" | "failed";
   createdAt: string;
   notionPageUrl?: string;
+  progress?: {
+    current: number;
+    total: number;
+    stage: string;
+  };
 }
 
 export interface LocalResult {

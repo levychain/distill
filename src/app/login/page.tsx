@@ -48,7 +48,7 @@ function LoginForm() {
         <div className="flex justify-center mb-4">
           <BookOpen className="h-12 w-12" />
         </div>
-        <CardTitle className="text-2xl">Content Study Tool</CardTitle>
+        <CardTitle className="text-2xl">Turn videos into actionable summaries</CardTitle>
         <CardDescription>
           Enter your password to access the app
         </CardDescription>

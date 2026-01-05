@@ -1,7 +1,7 @@
 {
-  "name": "Distill - Content Study Tool",
+  "name": "Distill",
   "short_name": "Distill",
-  "description": "Extract transcripts, generate study guides from YouTube, TikTok, Instagram, and X",
+  "description": "Turn videos into actionable summaries.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f1115",

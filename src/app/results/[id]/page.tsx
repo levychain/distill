@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ProcessingStatus } from "@/components/processing-status";
 import { ResultsView } from "@/components/results-view";
-import { updateLocalHistory, removeFromLocalHistory, saveSessionResult, getSessionResult } from "@/lib/local-history";
+import { updateLocalHistory, saveSessionResult, getSessionResult } from "@/lib/local-history";
 import { ArrowLeft } from "lucide-react";
 import type { StatusResponse } from "@/types";
 
@@ -62,15 +62,10 @@ export default function ResultsPage() {
     
     setError(errorMessage);
     
-    // If session not found and no cached results, remove from local history
-    if (errorMessage.includes("not found")) {
-      removeFromLocalHistory(sessionId);
-    } else {
-      // Update local history with failed status
-      updateLocalHistory(sessionId, {
-        status: "failed",
-      });
-    }
+    // Mark as failed in local history (don't delete - preserves user history across deploys)
+    updateLocalHistory(sessionId, {
+      status: "failed",
+    });
   };
 
   return (

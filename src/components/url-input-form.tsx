@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { parseUrls, type UrlInfo } from "@/lib/url-detector";
 import { saveToLocalHistory } from "@/lib/local-history";
@@ -68,11 +67,10 @@ function truncateUrl(url: string): string {
   }
 }
 
-export function UrlInputForm() {
+export function UrlInputForm({ onSessionCreated }: { onSessionCreated?: () => void } = {}) {
   const [urlList, setUrlList] = useState<UrlInfo[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -205,6 +203,8 @@ export function UrlInputForm() {
     setIsLoading(true);
 
     try {
+      const urlCount = urlList.length;
+      
       const response = await fetch("/api/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -220,17 +220,28 @@ export function UrlInputForm() {
 
       const data = await response.json();
       
-      // Save to local history immediately
+      // Save to local history immediately with processing status
       saveToLocalHistory({
         id: data.sessionId,
         topicName: data.topicName || "Processing...",
-        urlCount: urlList.length,
+        urlCount,
         status: "processing",
         createdAt: new Date().toISOString(),
         notionPageUrl: data.notionPageUrl,
       });
       
-      router.push(`/results/${data.sessionId}`);
+      // Clear the form and stay on page
+      setUrlList([]);
+      setInputValue("");
+      setIsLoading(false);
+      
+      // Notify parent to refresh session list
+      onSessionCreated?.();
+      
+      toast({
+        title: "Processing started",
+        description: `Distilling ${urlCount} source${urlCount !== 1 ? "s" : ""}...`,
+      });
     } catch (error) {
       toast({
         title: "Error",

@@ -9,7 +9,7 @@ import {
   ToastViewport,
 } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 export function Toaster() {
   const { toasts } = useToast();
@@ -18,13 +18,16 @@ export function Toaster() {
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, variant, ...props }) {
         const isDestructive = variant === "destructive";
+        const isProcessing = title === "Processing started";
         
         return (
           <Toast key={id} variant={variant} {...props}>
             {/* Icon */}
-            <div className={`shrink-0 ${isDestructive ? "text-red-400" : "text-primary"}`}>
+            <div className={`shrink-0 ${isDestructive ? "text-red-400" : isProcessing ? "text-yellow-500" : "text-green-500"}`}>
               {isDestructive ? (
                 <AlertCircle className="h-5 w-5" />
+              ) : isProcessing ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
                 <CheckCircle2 className="h-5 w-5" />
               )}

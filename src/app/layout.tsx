@@ -7,8 +7,8 @@ import { Toaster } from "@/components/ui/toaster";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Distill - Content Study Tool",
-  description: "Extract transcripts, generate study guides from YouTube, TikTok, Instagram, and X",
+  title: "Distill",
+  description: "Turn videos into actionable summaries.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -17,6 +17,16 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    title: "Distill",
+    description: "Turn videos into actionable summaries.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Distill",
+    description: "Turn videos into actionable summaries.",
   },
 };
 
