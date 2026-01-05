@@ -27,6 +27,69 @@ function formatStage(stage: string | undefined): string {
   return cleaned;
 }
 
+// Skeleton that previews the results layout
+function ResultsSkeleton() {
+  return (
+    <div className="w-full max-w-2xl mx-auto space-y-8 animate-pulse">
+      {/* Source pills skeleton */}
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-20 bg-secondary/40 rounded-full" />
+        <div className="h-8 w-24 bg-secondary/40 rounded-full" />
+        <div className="h-8 w-16 bg-secondary/40 rounded-full" />
+      </div>
+
+      {/* Summary skeleton */}
+      <div className="space-y-4">
+        <div className="h-3 w-16 bg-secondary/40 rounded" />
+        <div className="space-y-3">
+          <div className="flex gap-4">
+            <div className="h-1.5 w-1.5 rounded-full bg-secondary/40 mt-2 shrink-0" />
+            <div className="h-5 flex-1 bg-secondary/40 rounded" />
+          </div>
+          <div className="flex gap-4">
+            <div className="h-1.5 w-1.5 rounded-full bg-secondary/40 mt-2 shrink-0" />
+            <div className="h-5 w-3/4 bg-secondary/40 rounded" />
+          </div>
+          <div className="flex gap-4">
+            <div className="h-1.5 w-1.5 rounded-full bg-secondary/40 mt-2 shrink-0" />
+            <div className="h-5 w-5/6 bg-secondary/40 rounded" />
+          </div>
+          <div className="flex gap-4">
+            <div className="h-1.5 w-1.5 rounded-full bg-secondary/40 mt-2 shrink-0" />
+            <div className="h-5 w-2/3 bg-secondary/40 rounded" />
+          </div>
+        </div>
+      </div>
+
+      {/* Transcript toggle skeleton */}
+      <div className="flex items-center gap-4">
+        <div className="h-5 w-24 bg-secondary/40 rounded" />
+        <div className="h-5 w-12 bg-secondary/40 rounded" />
+      </div>
+
+      {/* Action button skeleton */}
+      <div className="pt-4 border-t border-border/30">
+        <div className="h-11 bg-secondary/40 rounded-xl" />
+      </div>
+
+      {/* Chat skeleton */}
+      <div className="pt-4">
+        <div className="rounded-2xl border border-border/30 bg-secondary/20 overflow-hidden">
+          <div className="px-5 py-3 border-b border-border/30">
+            <div className="h-3 w-24 bg-secondary/40 rounded" />
+          </div>
+          <div className="h-[200px] p-5">
+            <div className="h-4 w-48 bg-secondary/30 rounded mx-auto mt-16" />
+          </div>
+          <div className="p-3 border-t border-border/30">
+            <div className="h-11 bg-secondary/40 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ProcessingStatus({
   sessionId,
   onComplete,
@@ -106,36 +169,42 @@ const pollStatus = async () => {
   const displayProgress = Math.min(Math.max(baseProgress, stageBonus > baseProgress ? stageBonus : baseProgress + 5), 95);
 
   return (
-    <div className="text-center py-20 space-y-8">
-      {/* Combined stage + count */}
-      <p className="text-lg font-medium text-muted-foreground">
-        {stageText}
-        {total > 1 && (
-          <span className="text-foreground"> · {Math.min(current + 1, total)} of {total}</span>
-        )}
-      </p>
+    <div className="space-y-10">
+      {/* Progress header */}
+      <div className="text-center space-y-4">
+        {/* Combined stage + count */}
+        <p className="text-lg font-medium text-muted-foreground">
+          {stageText}
+          {total > 1 && (
+            <span className="text-foreground"> · {Math.min(current + 1, total)} of {total}</span>
+          )}
+        </p>
 
-      {/* Progress bar with shimmer animation */}
-      <div className="max-w-xs mx-auto">
-        <div className="h-1 bg-secondary/30 rounded-full overflow-hidden">
-          <div 
-            className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
-            style={{ 
-              width: `${displayProgress}%`,
-              background: 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%)'
-            }}
-          >
-            {/* Shimmer overlay */}
+        {/* Progress bar with shimmer animation */}
+        <div className="max-w-xs mx-auto">
+          <div className="h-1 bg-secondary/30 rounded-full overflow-hidden">
             <div 
-              className="absolute inset-0 animate-shimmer"
-              style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
-                backgroundSize: '200% 100%',
+              className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+              style={{ 
+                width: `${displayProgress}%`,
+                background: 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 100%)'
               }}
-            />
+            >
+              {/* Shimmer overlay */}
+              <div 
+                className="absolute inset-0 animate-shimmer"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                  backgroundSize: '200% 100%',
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Results skeleton preview */}
+      <ResultsSkeleton />
     </div>
   );
 }
